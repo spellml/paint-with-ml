@@ -1,12 +1,7 @@
 # TODO: this docstring
 
-# Changes relative to model_0.py:
-# * Decreased load_size from 286 to 256, matching crop_size. I do not think edge cropping is
-#   useful with this dataset.
-# * Changed the results target to '/spell/bob_ross_segmented/results/' (though this value
-#   doesn't do anything because opt.no_html = True).
-# * Set opt.use_vae = True to enable the VAE layer; the intent of this run is to evaluate this
-#   training option.
+# Changes relative to model_1.py:
+# * Increased output size to 512x512.
 
 import sys; sys.path.append('../lib/SPADE-master/')
 from options.train_options import TrainOptions
@@ -29,12 +24,12 @@ opt.cache_filelist_write = False
 opt.checkpoints_dir = '/spell/checkpoints/'
 opt.contain_dontcare_label = False
 opt.continue_train = False
-opt.crop_size = 256
+opt.crop_size = 512
 opt.dataroot = '/spell/bob_ross_segmented/'  # data mount point
 opt.dataset_mode = 'custom'
 opt.debug = False
 opt.display_freq = 100
-opt.display_winsize = 256
+opt.display_winsize = 512
 opt.fff = 1  # junk value for the argparse
 opt.gan_mode = 'hinge'
 opt.init_type = 'xavier'
@@ -44,7 +39,7 @@ opt.lambda_feat = 10.0
 opt.lambda_kld = 0.05
 opt.lambda_vgg = 10.0
 opt.load_from_opt_file = False
-opt.load_size = 256
+opt.load_size = 512
 opt.lr = 0.0002
 opt.max_dataset_size = 9223372036854775807
 opt.model = 'pix2pix'
@@ -96,8 +91,6 @@ if not os.path.exists('/spell/checkpoints/'):
     os.mkdir('/spell/checkpoints/')
 if not os.path.exists('/spell/checkpoints/bob_ross/'):
     os.mkdir('/spell/checkpoints/bob_ross/')
-if not os.path.exists('/spell/bob_ross_segmented/results/'):
-    os.mkdir('/spell/bob_ross_segmented/results/')
 
 model = Pix2PixModel(opt)
 model.train()
