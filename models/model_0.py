@@ -8,6 +8,7 @@ import data
 from util.iter_counter import IterationCounter
 from util.visualizer import Visualizer
 from trainers.pix2pix_trainer import Pix2PixTrainer
+import os
 
 opt = TrainOptions()
 opt.D_steps_per_G = 1
@@ -41,7 +42,7 @@ opt.max_dataset_size = 9223372036854775807
 opt.model = 'pix2pix'
 opt.nThreads = 0
 opt.n_layers_D = 4
-opt.name = 'ade20k_pretrained'
+opt.name = 'bob_ross'
 opt.ndf = 64
 opt.nef = 16
 opt.netD = 'multiscale'
@@ -81,6 +82,12 @@ opt.label_nc = 9
 opt.label_dir = '/spell/bob_ross_segmented/training/labels/'
 opt.image_dir = '/spell/bob_ross_segmented/training/images/'
 opt.instance_dir = ''
+
+# Create the folder structure expected by the model checkpointing feature.
+if not os.path.exists('/spell/checkpoints/'):
+    os.mkdir('/spell/checkpoints/')
+if not os.path.exists('/spell/checkpoints/bob_ross/'):
+    os.mkdir('/spell/checkpoints/bob_ross/')
 
 model = Pix2PixModel(opt)
 model.train()
