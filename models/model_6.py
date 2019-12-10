@@ -1,7 +1,8 @@
 # TODO: this docstring
 
-# This model trains for 100 epochs instead of the standard 50; and it uses the TensorBoard
-# integration. KLD is still set to 10x the default.
+# This model trains for 100 epochs instead of the standard 50, and it uses the TensorBoard
+# integration. KLD is reset back to its original value of 0.05; compare to model_5.py, where
+# KLD is set 10x higher, to 0.5.
 
 import sys; sys.path.append('../lib/SPADE-master/')
 from options.train_options import TrainOptions
@@ -36,7 +37,7 @@ opt.init_type = 'xavier'
 opt.init_variance = 0.02
 opt.isTrain = True
 opt.lambda_feat = 10.0
-opt.lambda_kld = 0.5
+opt.lambda_kld = 0.05
 opt.lambda_vgg = 10.0
 opt.load_from_opt_file = False
 opt.load_size = 512
