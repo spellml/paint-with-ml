@@ -1,8 +1,15 @@
 # This is a ADE20K training script in a 512x512 configuration.
 # Used to test how long and how expensive this model would be to train from scratch.
 
-import sys; sys.path.append('../models/SPADE-master/')
+import sys; sys.path.append('../lib/SPADE-master/')
 from options.train_options import TrainOptions
+from models.pix2pix_model import Pix2PixModel
+from collections import OrderedDict
+import data
+from util.iter_counter import IterationCounter
+from util.visualizer import Visualizer
+from trainers.pix2pix_trainer import Pix2PixTrainer
+
 opt = TrainOptions()
 
 opt.D_steps_per_G = 1
