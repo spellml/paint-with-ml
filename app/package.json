@@ -1,0 +1,30 @@
+{
+  "name": "bob-ross-neural-painter",
+  "version": "1.0.0",
+  "description": "Paint your own Bob Ross.",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx browserify -t [babelify --presets [ @babel/preset-env @babel/preset-react ] ] index.js -o dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ResidentMario/bob-ross-neural-painter.git"
+  },
+  "author": "Aleksey Bilogur",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ResidentMario/bob-ross-neural-painter/issues"
+  },
+  "homepage": "https://github.com/ResidentMario/bob-ross-neural-painter#readme",
+  "dependencies": {
+    "@babel/core": "^7.7.5",
+    "@babel/preset-env": "^7.7.6",
+    "@babel/preset-react": "^7.7.4",
+    "babelify": "^10.0.0",
+    "browserify": "^16.5.0",
+    "core-js": "^3.5.0",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0"
+  }
+}

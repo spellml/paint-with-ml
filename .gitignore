@@ -5,3 +5,4 @@ lib/SPADE-master/docs/
 .vscode
 *.pyc
 __pycache__/
+node_modules/
