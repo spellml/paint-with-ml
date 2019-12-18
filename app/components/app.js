@@ -25,10 +25,10 @@ class App extends Component {
             // 512x512 pixel state array
         }
 
-        this.onButtonClick = this.onButtonClick.bind(this);
+        this.onToolboxButtonClick = this.onToolboxButtonClick.bind(this);
     }
 
-    onButtonClick(n) {
+    onToolboxButtonClick(n) {
         return () => this.setState(Object.assign({}, this.state, {'tool_value': n}));
     }
 
@@ -50,7 +50,7 @@ class App extends Component {
             <div id='toolbox-container'>
                 <Toolbox
                     id='toolbox'
-                    onButtonClick={this.onButtonClick}
+                    onButtonClick={this.onToolboxButtonClick}
                 />
             </div>
             <div id='spacer'>spacer</div>

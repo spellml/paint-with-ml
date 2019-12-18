@@ -62,13 +62,13 @@ function (_Component) {
       // 512x512 pixel state array
 
     };
-    _this.onButtonClick = _this.onButtonClick.bind(_assertThisInitialized(_this));
+    _this.onToolboxButtonClick = _this.onToolboxButtonClick.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(App, [{
-    key: "onButtonClick",
-    value: function onButtonClick(n) {
+    key: "onToolboxButtonClick",
+    value: function onToolboxButtonClick(n) {
       var _this2 = this;
 
       return function () {
@@ -100,7 +100,7 @@ function (_Component) {
         id: "toolbox-container"
       }, _react["default"].createElement(_toolbox["default"], {
         id: "toolbox",
-        onButtonClick: this.onButtonClick
+        onButtonClick: this.onToolboxButtonClick
       })), _react["default"].createElement("div", {
         id: "spacer"
       }, "spacer"), _react["default"].createElement("div", {
@@ -330,7 +330,16 @@ function (_Component) {
         }));
         var img = new ImageData(this.state.segmap, 512, 512);
         this.ctx.putImageData(img, 0, 0);
-      } else if (this.props.tool === 'eraser') {// TODO
+      } else if (this.props.tool === 'eraser') {
+        var _segmap2 = this.penMatrix(x, y, this.props.tool_radius, 9);
+
+        this.setState(Object.assign({}, this.state, {
+          'segmap': _segmap2
+        }));
+
+        var _img = new ImageData(this.state.segmap, 512, 512);
+
+        this.ctx.putImageData(_img, 0, 0); // TODO
       } else if (this.props.tool === 'bucket') {// TODO
       }
     }

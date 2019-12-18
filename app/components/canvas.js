@@ -107,6 +107,10 @@ class Canvas extends Component {
             let img = new ImageData(this.state.segmap, 512, 512);
             this.ctx.putImageData(img, 0, 0);
         } else if (this.props.tool === 'eraser') {
+            let segmap = this.penMatrix(x, y, this.props.tool_radius, 9);
+            this.setState(Object.assign({}, this.state, {'segmap': segmap}));
+            let img = new ImageData(this.state.segmap, 512, 512);
+            this.ctx.putImageData(img, 0, 0);
             // TODO
         } else if (this.props.tool === 'bucket') {
             // TODO
