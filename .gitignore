@@ -6,3 +6,4 @@ lib/SPADE-master/docs/
 *.pyc
 __pycache__/
 node_modules/
+dist/

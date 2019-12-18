@@ -8,6 +8,10 @@ exports["default"] = void 0;
 
 var _react = _interopRequireWildcard(require("react"));
 
+var _canvas = _interopRequireDefault(require("./canvas"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -40,29 +44,36 @@ function (_Component) {
 
     _classCallCheck(this, App);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(App).call(this));
-    _this.state = {// current tool (brush, bucket, eraser)
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(App).call(this)); // React wants to be the authority on all state and rendering, and to arbitrate when
+    // a change in state requires a rerender. The Canvas API, used for the draw space, is
+    // incompatible with this: all work is done by calling methods on the canvas object.
+    //
+    // React refs, used here, are the escape hatch specifically designed for cases like this.
+    // cf. https://philna.sh/blog/2018/09/27/techniques-for-animating-on-the-canvas-in-react/
+
+    _this.canvasRef = _react["default"].createRef();
+    _this.state = {
+      'tool': 'pen',
+      'tool_radius': 10,
+      'tool_value': 2 // current tool (brush, bucket, eraser)
       // current brush size
       // 512x512 pixel state array
+
     };
     return _this;
   }
 
   _createClass(App, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      document.addEventListener("mousedown", function (event) {
-        console.log(event.layerX);
-        console.log(event.layerY);
-      }, false);
-    }
-  }, {
     key: "render",
     value: function render() {
-      return _react["default"].createElement("canvas", {
+      return _react["default"].createElement(_canvas["default"], {
         id: "draw_space",
         width: "512",
-        height: "512"
+        height: "512",
+        tool: this.state.tool,
+        tool_radius: this.state.tool_radius,
+        tool_value: this.state.tool_value,
+        ref: this.canvasRef
       });
     }
   }]);
@@ -73,20 +84,384 @@ function (_Component) {
 var _default = App;
 exports["default"] = _default;
 
-},{"react":12}],2:[function(require,module,exports){
+},{"./canvas":2,"react":14}],2:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _purecanvas = _interopRequireDefault(require("./purecanvas"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+var Canvas =
+/*#__PURE__*/
+function (_Component) {
+  _inherits(Canvas, _Component);
+
+  function Canvas(props) {
+    var _this;
+
+    _classCallCheck(this, Canvas);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Canvas).call(this, props));
+    var segmentation_map = Array(512).fill(Array(512).fill(0));
+    _this.state = {
+      'segmentation_map': segmentation_map
+    };
+    _this.color_key = {
+      0: [241, 159, 240, 255],
+      1: [154, 153, 64, 255],
+      2: [255, 253, 57, 255],
+      3: [50, 0, 50, 255],
+      4: [249, 40, 55, 255],
+      5: [50, 0, 0, 255],
+      6: [45, 255, 254, 255],
+      // TODO: 7, sea
+      8: [0, 50, 50, 255]
+    };
+    _this.label_key = {
+      0: 'sky',
+      1: 'tree',
+      2: 'grass',
+      3: 'earth',
+      4: 'mountain',
+      5: 'plant',
+      6: 'water',
+      7: 'sea',
+      8: 'river'
+    }; // TODO: recall (and write here) why this bind operation is necessary.
+
+    _this.saveContext = _this.saveContext.bind(_assertThisInitialized(_this));
+    _this.onClick = _this.onClick.bind(_assertThisInitialized(_this));
+    _this.onMouseDown = _this.onMouseDown.bind(_assertThisInitialized(_this));
+    _this.onMouseUp = _this.onMouseUp.bind(_assertThisInitialized(_this));
+    _this.onMouseMove = _this.onMouseMove.bind(_assertThisInitialized(_this));
+    return _this;
+  }
+
+  _createClass(Canvas, [{
+    key: "saveContext",
+    value: function saveContext(ctx) {
+      this.ctx = ctx;
+      this.width = this.ctx.canvas.width;
+      this.height = this.ctx.canvas.height;
+    }
+  }, {
+    key: "penMatrix",
+    value: function penMatrix(cx, cy, r, v) {
+      var seg = _toConsumableArray(this.state.segmentation_map.map(function (sa) {
+        return _toConsumableArray(sa);
+      }));
+
+      var _ref = [Math.max(0, cx - r), Math.min(512, cx + r)],
+          xmin = _ref[0],
+          xmax = _ref[1];
+      var _ref2 = [Math.max(0, cy - r), Math.min(512, cy + r)],
+          ymin = _ref2[0],
+          ymax = _ref2[1];
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = _toConsumableArray(Array(xmax - xmin).keys()).map(function (v) {
+          return v + xmin;
+        })[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var x = _step.value;
+          var _iteratorNormalCompletion2 = true;
+          var _didIteratorError2 = false;
+          var _iteratorError2 = undefined;
+
+          try {
+            for (var _iterator2 = _toConsumableArray(Array(ymax - ymin).keys()).map(function (v) {
+              return v + ymin;
+            })[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+              var y = _step2.value;
+              if (Math.abs(cx - x) + Math.abs(cy - y) <= r) seg[y][x] = v;
+            }
+          } catch (err) {
+            _didIteratorError2 = true;
+            _iteratorError2 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+                _iterator2["return"]();
+              }
+            } finally {
+              if (_didIteratorError2) {
+                throw _iteratorError2;
+              }
+            }
+          }
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+            _iterator["return"]();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      return seg;
+    }
+  }, {
+    key: "segmentationMapToArray",
+    value: function segmentationMapToArray(segmap) {
+      var out = new Uint8ClampedArray(512 * 512 * 4);
+
+      for (var _i = 0, _arr = _toConsumableArray(Array(512).keys()); _i < _arr.length; _i++) {
+        var x = _arr[_i];
+
+        for (var _i2 = 0, _arr2 = _toConsumableArray(Array(512).keys()); _i2 < _arr2.length; _i2++) {
+          var y = _arr2[_i2];
+          var pos = x * 512 * 4 + y * 4;
+          var color = this.color_key[segmap[x][y]];
+          out[pos] = color[0];
+          out[pos + 1] = color[1];
+          out[pos + 2] = color[2];
+          out[pos + 3] = color[3];
+        }
+      }
+
+      return out;
+    }
+  }, {
+    key: "paint",
+    value: function paint(e) {
+      var x = e.pageX - e.target.offsetLeft;
+      var y = e.pageY - e.target.offsetTop;
+
+      if (this.props.tool === 'pen') {
+        // TODO
+        var segmap = this.penMatrix(x, y, this.props.tool_radius, this.props.tool_value); // console.log(segmap);
+
+        this.setState(Object.assign({}, this.state, {
+          'segmentation_map': segmap
+        }));
+        var img = new ImageData(this.segmentationMapToArray(segmap), 512, 512);
+        this.ctx.putImageData(img, 0, 0);
+      } else if (this.props.tool === 'eraser') {// TODO
+      } else if (this.props.tool === 'bucket') {// TODO
+      }
+    }
+  }, {
+    key: "onMouseDown",
+    value: function onMouseDown() {
+      this.mouse_down = true;
+    }
+  }, {
+    key: "onMouseUp",
+    value: function onMouseUp() {
+      this.mouse_down = false;
+    }
+  }, {
+    key: "onMouseMove",
+    value: function onMouseMove(e) {
+      if (this.mouse_down) {
+        this.paint(e);
+      }
+    }
+  }, {
+    key: "onClick",
+    value: function onClick(e) {
+      this.paint(e);
+    }
+  }, {
+    key: "componentDidMount",
+    value: function componentDidMount() {// document.addEventListener("mousedown", (event) => {
+      //     console.log(event.layerX);
+      //     console.log(event.layerY);
+      // }, false);
+    }
+  }, {
+    key: "componentDidUpdate",
+    value: function componentDidUpdate() {// const { angle } = this.props;
+      // this.ctx.save();
+      // this.ctx.beginPath();
+      // this.ctx.clearRect(0, 0, this.width, this.height);
+      // this.ctx.translate(this.width / 2, this.height / 2);
+      // this.ctx.rotate((angle * Math.PI) / 180);
+      // this.ctx.fillStyle = '#4397AC';
+      // this.ctx.fillRect(
+      // -this.width / 4,
+      // -this.height / 4,
+      // this.width / 2,
+      // this.height / 2
+      // );
+      // this.ctx.restore();
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      // Component state updates trigger component rerenders, subject to shouldComponentUpdate
+      // rules. We do not want to have React ever rerender the canvas object after initial
+      // creation, as doing so will clear the canvas (e.g. the <canvas> tag is not idempotent).
+      // But we cannot simply have shouldComponentUpdate always return false because we still
+      // need to be able to trigger updates in the content of the canvas itself.
+      //e
+      // To allow for this, we bury the canvas HTML tag in a PureCanvas subcomponent that is set
+      // to never update after creation. This subcomponent has the follow attribute:
+      //
+      //     ref={ node => node ? this.props.contextRef(node.getContext('2d')) : null }
+      //
+      // contextRef is a prop alias of the saveContext method defined in the Canvas parent class.
+      // node is the pure DOM node passed to ref by React, and node.getContext('2d') is a context
+      // declaration from the Canvas API that returns a canvas context object with attached
+      // methods we are supposed to call for plotting.
+      //
+      // Thus what this arrangement does is as follows. At render time, if the DOM node is
+      // defined, nothing happens. If the DOM node is not defined, saveContext (above) is called
+      // on the context object returned by the Canvas API call. All saveContext does is save that
+      // raw context object as a prop on the object.
+      //
+      // This allows us to have a reference to the Canvas context, with all of its attached
+      // update methods, whilst retaining a <canvas> that is never updated using React.
+      return _react["default"].createElement(_purecanvas["default"], {
+        contextRef: this.saveContext,
+        onClick: this.onClick,
+        onMouseDown: this.onMouseDown,
+        onMouseUp: this.onMouseUp,
+        onMouseMove: this.onMouseMove
+      });
+    }
+  }]);
+
+  return Canvas;
+}(_react.Component);
+
+var _default = Canvas;
+exports["default"] = _default;
+
+},{"./purecanvas":3,"react":14}],3:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+var PureCanvas =
+/*#__PURE__*/
+function (_Component) {
+  _inherits(PureCanvas, _Component);
+
+  function PureCanvas() {
+    _classCallCheck(this, PureCanvas);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(PureCanvas).apply(this, arguments));
+  }
+
+  _createClass(PureCanvas, [{
+    key: "shouldComponentUpdate",
+    value: function shouldComponentUpdate() {
+      return false;
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this = this;
+
+      return _react["default"].createElement("canvas", {
+        // See Canvas.render for a detailed explanation of what this line of code does.
+        ref: function ref(node) {
+          return node ? _this.props.contextRef(node.getContext('2d')) : null;
+        },
+        width: "512",
+        height: "512",
+        onClick: this.props.onClick,
+        onMouseDown: this.props.onMouseDown,
+        onMouseUp: this.props.onMouseUp,
+        onMouseMove: this.props.onMouseMove
+      });
+    }
+  }]);
+
+  return PureCanvas;
+}(_react.Component);
+
+var _default = PureCanvas;
+exports["default"] = _default;
+
+},{"react":14}],4:[function(require,module,exports){
 "use strict";
 
 var _react = _interopRequireDefault(require("react"));
 
 var _reactDom = require("react-dom");
 
-var _app = _interopRequireDefault(require("./containers/app.js"));
+var _app = _interopRequireDefault(require("./components/app.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 (0, _reactDom.render)(_react["default"].createElement(_app["default"], null), document.getElementById('root'));
 
-},{"./containers/app.js":1,"react":12,"react-dom":9}],3:[function(require,module,exports){
+},{"./components/app.js":1,"react":14,"react-dom":11}],5:[function(require,module,exports){
 /*
 object-assign
 (c) Sindre Sorhus
@@ -178,7 +553,7 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 	return to;
 };
 
-},{}],4:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -364,7 +739,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],5:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 (function (process){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
@@ -470,7 +845,7 @@ checkPropTypes.resetWarningCache = function() {
 module.exports = checkPropTypes;
 
 }).call(this,require('_process'))
-},{"./lib/ReactPropTypesSecret":6,"_process":4}],6:[function(require,module,exports){
+},{"./lib/ReactPropTypesSecret":8,"_process":6}],8:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
@@ -484,7 +859,7 @@ var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
 
 module.exports = ReactPropTypesSecret;
 
-},{}],7:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 (function (process){
 /** @license React v16.12.0
  * react-dom.development.js
@@ -28283,7 +28658,7 @@ module.exports = reactDom;
 }
 
 }).call(this,require('_process'))
-},{"_process":4,"object-assign":3,"prop-types/checkPropTypes":5,"react":12,"scheduler":17,"scheduler/tracing":18}],8:[function(require,module,exports){
+},{"_process":6,"object-assign":5,"prop-types/checkPropTypes":7,"react":14,"scheduler":19,"scheduler/tracing":20}],10:[function(require,module,exports){
 /** @license React v16.12.0
  * react-dom.production.min.js
  *
@@ -28575,7 +28950,7 @@ xe,ye,Ca.injectEventPluginsByName,fa,Sc,function(a){ya(a,Rc)},cb,db,Pd,Ba,Sj,{cu
 (function(a){var b=a.findFiberByHostInstance;return ok(n({},a,{overrideHookState:null,overrideProps:null,setSuspenseHandler:null,scheduleUpdate:null,currentDispatcherRef:Ea.ReactCurrentDispatcher,findHostInstanceByFiber:function(a){a=ic(a);return null===a?null:a.stateNode},findFiberByHostInstance:function(a){return b?b(a):null},findHostInstancesForRefresh:null,scheduleRefresh:null,scheduleRoot:null,setRefreshHandler:null,getCurrentFiber:null}))})({findFiberByHostInstance:Fc,bundleType:0,version:"16.12.0",
 rendererPackageName:"react-dom"});var Dk={default:Ck},Ek=Dk&&Ck||Dk;module.exports=Ek.default||Ek;
 
-},{"object-assign":3,"react":12,"scheduler":17}],9:[function(require,module,exports){
+},{"object-assign":5,"react":14,"scheduler":19}],11:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -28617,7 +28992,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this,require('_process'))
-},{"./cjs/react-dom.development.js":7,"./cjs/react-dom.production.min.js":8,"_process":4}],10:[function(require,module,exports){
+},{"./cjs/react-dom.development.js":9,"./cjs/react-dom.production.min.js":10,"_process":6}],12:[function(require,module,exports){
 (function (process){
 /** @license React v16.12.0
  * react.development.js
@@ -30941,7 +31316,7 @@ module.exports = react;
 }
 
 }).call(this,require('_process'))
-},{"_process":4,"object-assign":3,"prop-types/checkPropTypes":5}],11:[function(require,module,exports){
+},{"_process":6,"object-assign":5,"prop-types/checkPropTypes":7}],13:[function(require,module,exports){
 /** @license React v16.12.0
  * react.production.min.js
  *
@@ -30968,7 +31343,7 @@ b,c){return W().useImperativeHandle(a,b,c)},useDebugValue:function(){},useLayout
 if(null!=b){void 0!==b.ref&&(g=b.ref,l=J.current);void 0!==b.key&&(d=""+b.key);if(a.type&&a.type.defaultProps)var f=a.type.defaultProps;for(k in b)K.call(b,k)&&!L.hasOwnProperty(k)&&(e[k]=void 0===b[k]&&void 0!==f?f[k]:b[k])}var k=arguments.length-2;if(1===k)e.children=c;else if(1<k){f=Array(k);for(var m=0;m<k;m++)f[m]=arguments[m+2];e.children=f}return{$$typeof:p,type:a.type,key:d,ref:g,props:e,_owner:l}},createFactory:function(a){var b=M.bind(null,a);b.type=a;return b},isValidElement:N,version:"16.12.0",
 __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED:{ReactCurrentDispatcher:I,ReactCurrentBatchConfig:{suspense:null},ReactCurrentOwner:J,IsSomeRendererActing:{current:!1},assign:h}},Y={default:X},Z=Y&&X||Y;module.exports=Z.default||Z;
 
-},{"object-assign":3}],12:[function(require,module,exports){
+},{"object-assign":5}],14:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -30979,7 +31354,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this,require('_process'))
-},{"./cjs/react.development.js":10,"./cjs/react.production.min.js":11,"_process":4}],13:[function(require,module,exports){
+},{"./cjs/react.development.js":12,"./cjs/react.production.min.js":13,"_process":6}],15:[function(require,module,exports){
 (function (process){
 /** @license React v0.18.0
  * scheduler-tracing.development.js
@@ -31406,7 +31781,7 @@ exports.unstable_unsubscribe = unstable_unsubscribe;
 }
 
 }).call(this,require('_process'))
-},{"_process":4}],14:[function(require,module,exports){
+},{"_process":6}],16:[function(require,module,exports){
 /** @license React v0.18.0
  * scheduler-tracing.production.min.js
  *
@@ -31418,7 +31793,7 @@ exports.unstable_unsubscribe = unstable_unsubscribe;
 
 'use strict';Object.defineProperty(exports,"__esModule",{value:!0});var b=0;exports.__interactionsRef=null;exports.__subscriberRef=null;exports.unstable_clear=function(a){return a()};exports.unstable_getCurrent=function(){return null};exports.unstable_getThreadID=function(){return++b};exports.unstable_trace=function(a,d,c){return c()};exports.unstable_wrap=function(a){return a};exports.unstable_subscribe=function(){};exports.unstable_unsubscribe=function(){};
 
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 (function (process){
 /** @license React v0.18.0
  * scheduler.development.js
@@ -32326,7 +32701,7 @@ exports.unstable_Profiling = unstable_Profiling;
 }
 
 }).call(this,require('_process'))
-},{"_process":4}],16:[function(require,module,exports){
+},{"_process":6}],18:[function(require,module,exports){
 /** @license React v0.18.0
  * scheduler.production.min.js
  *
@@ -32350,7 +32725,7 @@ exports.unstable_scheduleCallback=function(a,b,c){var d=exports.unstable_now();i
 exports.unstable_wrapCallback=function(a){var b=R;return function(){var c=R;R=b;try{return a.apply(this,arguments)}finally{R=c}}};exports.unstable_getCurrentPriorityLevel=function(){return R};exports.unstable_shouldYield=function(){var a=exports.unstable_now();V(a);var b=L(N);return b!==Q&&null!==Q&&null!==b&&null!==b.callback&&b.startTime<=a&&b.expirationTime<Q.expirationTime||k()};exports.unstable_requestPaint=Z;exports.unstable_continueExecution=function(){T||S||(T=!0,f(X))};
 exports.unstable_pauseExecution=function(){};exports.unstable_getFirstCallbackNode=function(){return L(N)};exports.unstable_Profiling=null;
 
-},{}],17:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -32361,7 +32736,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this,require('_process'))
-},{"./cjs/scheduler.development.js":15,"./cjs/scheduler.production.min.js":16,"_process":4}],18:[function(require,module,exports){
+},{"./cjs/scheduler.development.js":17,"./cjs/scheduler.production.min.js":18,"_process":6}],20:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -32372,4 +32747,4 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this,require('_process'))
-},{"./cjs/scheduler-tracing.development.js":13,"./cjs/scheduler-tracing.production.min.js":14,"_process":4}]},{},[2]);
+},{"./cjs/scheduler-tracing.development.js":15,"./cjs/scheduler-tracing.production.min.js":16,"_process":6}]},{},[4]);
