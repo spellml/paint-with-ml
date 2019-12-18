@@ -10,6 +10,8 @@ var _react = _interopRequireWildcard(require("react"));
 
 var _canvas = _interopRequireDefault(require("./canvas"));
 
+var _toolbox = _interopRequireDefault(require("./toolbox"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
@@ -26,9 +28,9 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
@@ -60,21 +62,50 @@ function (_Component) {
       // 512x512 pixel state array
 
     };
+    _this.onButtonClick = _this.onButtonClick.bind(_assertThisInitialized(_this));
     return _this;
   }
 
   _createClass(App, [{
+    key: "onButtonClick",
+    value: function onButtonClick(n) {
+      var _this2 = this;
+
+      return function () {
+        return _this2.setState(Object.assign({}, _this2.state, {
+          'tool_value': n
+        }));
+      };
+    }
+  }, {
     key: "render",
     value: function render() {
-      return _react["default"].createElement(_canvas["default"], {
-        id: "draw_space",
+      return _react["default"].createElement("div", {
+        id: "frame"
+      }, _react["default"].createElement("div", {
+        id: "canvas-container"
+      }, _react["default"].createElement(_canvas["default"], {
+        id: "canvas",
         width: "512",
         height: "512",
         tool: this.state.tool,
         tool_radius: this.state.tool_radius,
         tool_value: this.state.tool_value,
         ref: this.canvasRef
-      });
+      })), _react["default"].createElement("div", {
+        id: "build_button"
+      }, "built_button"), _react["default"].createElement("div", {
+        id: "output"
+      }, "output"), _react["default"].createElement("div", {
+        id: "toolbox-container"
+      }, _react["default"].createElement(_toolbox["default"], {
+        id: "toolbox",
+        onButtonClick: this.onButtonClick
+      })), _react["default"].createElement("div", {
+        id: "spacer"
+      }, "spacer"), _react["default"].createElement("div", {
+        id: "socal_sharer"
+      }, "social_shrarer"));
     }
   }]);
 
@@ -84,7 +115,7 @@ function (_Component) {
 var _default = App;
 exports["default"] = _default;
 
-},{"./canvas":2,"react":14}],2:[function(require,module,exports){
+},{"./canvas":2,"./toolbox":4,"react":16}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -139,10 +170,6 @@ function (_Component) {
     _classCallCheck(this, Canvas);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Canvas).call(this, props));
-    var segmentation_map = Array(512).fill(Array(512).fill(0));
-    _this.state = {
-      'segmentation_map': segmentation_map
-    };
     _this.color_key = {
       0: [241, 159, 240, 255],
       1: [154, 153, 64, 255],
@@ -151,19 +178,42 @@ function (_Component) {
       4: [249, 40, 55, 255],
       5: [50, 0, 0, 255],
       6: [45, 255, 254, 255],
-      // TODO: 7, sea
-      8: [0, 50, 50, 255]
-    };
-    _this.label_key = {
-      0: 'sky',
-      1: 'tree',
-      2: 'grass',
-      3: 'earth',
-      4: 'mountain',
-      5: 'plant',
-      6: 'water',
-      7: 'sea',
-      8: 'river'
+      7: [62, 110, 122, 255],
+      8: [0, 50, 50, 255],
+      9: [255, 255, 255, 255] // unset
+
+    }; // this.label_key = {
+    //     0: 'sky',
+    //     1: 'tree',
+    //     2: 'grass',
+    //     3: 'earth',
+    //     4: 'mountain',
+    //     5: 'plant',
+    //     6: 'water',
+    //     7: 'sea',
+    //     8: 'river'
+    // }
+
+    var segmap = new Uint8ClampedArray(512 * 512 * 4);
+    var default_skybox_top_color = _this.color_key[0];
+    var default_skybox_bottom_color = _this.color_key[2];
+
+    for (var _i = 0, _arr = _toConsumableArray(Array(512).keys()); _i < _arr.length; _i++) {
+      var x = _arr[_i];
+
+      for (var _i2 = 0, _arr2 = _toConsumableArray(Array(512).keys()); _i2 < _arr2.length; _i2++) {
+        var y = _arr2[_i2];
+        var color = y <= 256 ? default_skybox_top_color : default_skybox_bottom_color;
+        var pos = y * 512 * 4 + x * 4;
+        segmap[pos] = color[0];
+        segmap[pos + 1] = color[1];
+        segmap[pos + 2] = color[2];
+        segmap[pos + 3] = color[3];
+      }
+    }
+
+    _this.state = {
+      'segmap': segmap
     }; // TODO: recall (and write here) why this bind operation is necessary.
 
     _this.saveContext = _this.saveContext.bind(_assertThisInitialized(_this));
@@ -184,16 +234,14 @@ function (_Component) {
   }, {
     key: "penMatrix",
     value: function penMatrix(cx, cy, r, v) {
-      var seg = _toConsumableArray(this.state.segmentation_map.map(function (sa) {
-        return _toConsumableArray(sa);
-      }));
-
+      var segmap = this.state.segmap.slice();
       var _ref = [Math.max(0, cx - r), Math.min(512, cx + r)],
           xmin = _ref[0],
           xmax = _ref[1];
       var _ref2 = [Math.max(0, cy - r), Math.min(512, cy + r)],
           ymin = _ref2[0],
           ymax = _ref2[1];
+      var color = this.color_key[v];
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
       var _iteratorError = undefined;
@@ -212,7 +260,14 @@ function (_Component) {
               return v + ymin;
             })[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
               var y = _step2.value;
-              if (Math.abs(cx - x) + Math.abs(cy - y) <= r) seg[y][x] = v;
+
+              if (Math.abs(cx - x) + Math.abs(cy - y) <= r + 5) {
+                var pos = y * 512 * 4 + x * 4;
+                segmap[pos] = color[0];
+                segmap[pos + 1] = color[1];
+                segmap[pos + 2] = color[2];
+                segmap[pos + 3] = color[3];
+              }
             }
           } catch (err) {
             _didIteratorError2 = true;
@@ -244,29 +299,22 @@ function (_Component) {
         }
       }
 
-      return seg;
-    }
-  }, {
-    key: "segmentationMapToArray",
-    value: function segmentationMapToArray(segmap) {
-      var out = new Uint8ClampedArray(512 * 512 * 4);
+      return segmap;
+    } // segmentationMapToArray(segmap) {
+    //     let out = new Uint8ClampedArray(512 * 512 * 4);
+    //     for (let x of [...Array(512).keys()]) {
+    //         for (let y of [...Array(512).keys()]) {
+    //             const pos = (x * 512 * 4) + (y * 4);
+    //             const color = this.color_key[segmap[x][y]];
+    //             out[pos] = color[0];
+    //             out[pos + 1] = color[1];
+    //             out[pos + 2] = color[2];
+    //             out[pos + 3] = color[3];
+    //         }
+    //     }
+    //     return out;
+    // }
 
-      for (var _i = 0, _arr = _toConsumableArray(Array(512).keys()); _i < _arr.length; _i++) {
-        var x = _arr[_i];
-
-        for (var _i2 = 0, _arr2 = _toConsumableArray(Array(512).keys()); _i2 < _arr2.length; _i2++) {
-          var y = _arr2[_i2];
-          var pos = x * 512 * 4 + y * 4;
-          var color = this.color_key[segmap[x][y]];
-          out[pos] = color[0];
-          out[pos + 1] = color[1];
-          out[pos + 2] = color[2];
-          out[pos + 3] = color[3];
-        }
-      }
-
-      return out;
-    }
   }, {
     key: "paint",
     value: function paint(e) {
@@ -275,12 +323,12 @@ function (_Component) {
 
       if (this.props.tool === 'pen') {
         // TODO
-        var segmap = this.penMatrix(x, y, this.props.tool_radius, this.props.tool_value); // console.log(segmap);
+        var _segmap = this.penMatrix(x, y, this.props.tool_radius, this.props.tool_value);
 
         this.setState(Object.assign({}, this.state, {
-          'segmentation_map': segmap
+          'segmap': _segmap
         }));
-        var img = new ImageData(this.segmentationMapToArray(segmap), 512, 512);
+        var img = new ImageData(this.state.segmap, 512, 512);
         this.ctx.putImageData(img, 0, 0);
       } else if (this.props.tool === 'eraser') {// TODO
       } else if (this.props.tool === 'bucket') {// TODO
@@ -305,15 +353,14 @@ function (_Component) {
     }
   }, {
     key: "onClick",
-    value: function onClick(e) {
-      this.paint(e);
+    value: function onClick(e) {// TODO
+      // this.paint(e);
     }
   }, {
     key: "componentDidMount",
-    value: function componentDidMount() {// document.addEventListener("mousedown", (event) => {
-      //     console.log(event.layerX);
-      //     console.log(event.layerY);
-      // }, false);
+    value: function componentDidMount() {
+      var img = new ImageData(this.state.segmap, 512, 512);
+      this.ctx.putImageData(img, 0, 0);
     }
   }, {
     key: "componentDidUpdate",
@@ -374,7 +421,7 @@ function (_Component) {
 var _default = Canvas;
 exports["default"] = _default;
 
-},{"./purecanvas":3,"react":14}],3:[function(require,module,exports){
+},{"./purecanvas":3,"react":16}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -448,7 +495,168 @@ function (_Component) {
 var _default = PureCanvas;
 exports["default"] = _default;
 
-},{"react":14}],4:[function(require,module,exports){
+},{"react":16}],4:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _toolbox_button = _interopRequireDefault(require("./toolbox_button"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+var Toolbox =
+/*#__PURE__*/
+function (_Component) {
+  _inherits(Toolbox, _Component);
+
+  function Toolbox() {
+    _classCallCheck(this, Toolbox);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(Toolbox).apply(this, arguments));
+  }
+
+  _createClass(Toolbox, [{
+    key: "render",
+    // shouldComponentUpdate() {
+    //     return false;
+    // }
+    // TODO: convert below to using ToolboxButton.
+    value: function render() {
+      return _react["default"].createElement("div", {
+        id: "buttons-container"
+      }, _react["default"].createElement(_toolbox_button["default"], {
+        onClick: this.props.onButtonClick,
+        classId: 0,
+        classImage: "\u2601\uFE0F"
+      }), _react["default"].createElement(_toolbox_button["default"], {
+        onClick: this.props.onButtonClick,
+        classId: 1,
+        classImage: "\uD83C\uDF33"
+      }), _react["default"].createElement(_toolbox_button["default"], {
+        onClick: this.props.onButtonClick,
+        classId: 2,
+        classImage: "\uD83C\uDF31"
+      }), _react["default"].createElement(_toolbox_button["default"], {
+        onClick: this.props.onButtonClick,
+        classId: 3,
+        classImage: "\uD83D\uDDFF"
+      }), _react["default"].createElement(_toolbox_button["default"], {
+        onClick: this.props.onButtonClick,
+        classId: 4,
+        classImage: "\u26F0\uFE0F"
+      }), _react["default"].createElement(_toolbox_button["default"], {
+        onClick: this.props.onButtonClick,
+        classId: 5,
+        classImage: "\uD83C\uDF3F"
+      }), _react["default"].createElement(_toolbox_button["default"], {
+        onClick: this.props.onButtonClick,
+        classId: 6,
+        classImage: "\uD83D\uDCA7"
+      }), _react["default"].createElement(_toolbox_button["default"], {
+        onClick: this.props.onButtonClick,
+        classId: 7,
+        classImage: "\uD83C\uDF0A"
+      }), _react["default"].createElement(_toolbox_button["default"], {
+        onClick: this.props.onButtonClick,
+        classId: 8,
+        classImage: "\uD83D\uDCA6"
+      }));
+    }
+  }]);
+
+  return Toolbox;
+}(_react.Component);
+
+var _default = Toolbox;
+exports["default"] = _default;
+
+},{"./toolbox_button":5,"react":16}],5:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+var ToolboxButton =
+/*#__PURE__*/
+function (_Component) {
+  _inherits(ToolboxButton, _Component);
+
+  function ToolboxButton() {
+    _classCallCheck(this, ToolboxButton);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(ToolboxButton).apply(this, arguments));
+  }
+
+  _createClass(ToolboxButton, [{
+    key: "render",
+    value: function render() {
+      return _react["default"].createElement("button", {
+        className: "class-selector",
+        onClick: this.props.onClick(this.props.classId)
+      }, this.props.classImage);
+    }
+  }]);
+
+  return ToolboxButton;
+}(_react.Component);
+
+var _default = ToolboxButton;
+exports["default"] = _default;
+
+},{"react":16}],6:[function(require,module,exports){
 "use strict";
 
 var _react = _interopRequireDefault(require("react"));
@@ -461,7 +669,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "d
 
 (0, _reactDom.render)(_react["default"].createElement(_app["default"], null), document.getElementById('root'));
 
-},{"./components/app.js":1,"react":14,"react-dom":11}],5:[function(require,module,exports){
+},{"./components/app.js":1,"react":16,"react-dom":13}],7:[function(require,module,exports){
 /*
 object-assign
 (c) Sindre Sorhus
@@ -553,7 +761,7 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 	return to;
 };
 
-},{}],6:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -739,7 +947,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],7:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 (function (process){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
@@ -845,7 +1053,7 @@ checkPropTypes.resetWarningCache = function() {
 module.exports = checkPropTypes;
 
 }).call(this,require('_process'))
-},{"./lib/ReactPropTypesSecret":8,"_process":6}],8:[function(require,module,exports){
+},{"./lib/ReactPropTypesSecret":10,"_process":8}],10:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
@@ -859,7 +1067,7 @@ var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
 
 module.exports = ReactPropTypesSecret;
 
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function (process){
 /** @license React v16.12.0
  * react-dom.development.js
@@ -28658,7 +28866,7 @@ module.exports = reactDom;
 }
 
 }).call(this,require('_process'))
-},{"_process":6,"object-assign":5,"prop-types/checkPropTypes":7,"react":14,"scheduler":19,"scheduler/tracing":20}],10:[function(require,module,exports){
+},{"_process":8,"object-assign":7,"prop-types/checkPropTypes":9,"react":16,"scheduler":21,"scheduler/tracing":22}],12:[function(require,module,exports){
 /** @license React v16.12.0
  * react-dom.production.min.js
  *
@@ -28950,7 +29158,7 @@ xe,ye,Ca.injectEventPluginsByName,fa,Sc,function(a){ya(a,Rc)},cb,db,Pd,Ba,Sj,{cu
 (function(a){var b=a.findFiberByHostInstance;return ok(n({},a,{overrideHookState:null,overrideProps:null,setSuspenseHandler:null,scheduleUpdate:null,currentDispatcherRef:Ea.ReactCurrentDispatcher,findHostInstanceByFiber:function(a){a=ic(a);return null===a?null:a.stateNode},findFiberByHostInstance:function(a){return b?b(a):null},findHostInstancesForRefresh:null,scheduleRefresh:null,scheduleRoot:null,setRefreshHandler:null,getCurrentFiber:null}))})({findFiberByHostInstance:Fc,bundleType:0,version:"16.12.0",
 rendererPackageName:"react-dom"});var Dk={default:Ck},Ek=Dk&&Ck||Dk;module.exports=Ek.default||Ek;
 
-},{"object-assign":5,"react":14,"scheduler":19}],11:[function(require,module,exports){
+},{"object-assign":7,"react":16,"scheduler":21}],13:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -28992,7 +29200,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this,require('_process'))
-},{"./cjs/react-dom.development.js":9,"./cjs/react-dom.production.min.js":10,"_process":6}],12:[function(require,module,exports){
+},{"./cjs/react-dom.development.js":11,"./cjs/react-dom.production.min.js":12,"_process":8}],14:[function(require,module,exports){
 (function (process){
 /** @license React v16.12.0
  * react.development.js
@@ -31316,7 +31524,7 @@ module.exports = react;
 }
 
 }).call(this,require('_process'))
-},{"_process":6,"object-assign":5,"prop-types/checkPropTypes":7}],13:[function(require,module,exports){
+},{"_process":8,"object-assign":7,"prop-types/checkPropTypes":9}],15:[function(require,module,exports){
 /** @license React v16.12.0
  * react.production.min.js
  *
@@ -31343,7 +31551,7 @@ b,c){return W().useImperativeHandle(a,b,c)},useDebugValue:function(){},useLayout
 if(null!=b){void 0!==b.ref&&(g=b.ref,l=J.current);void 0!==b.key&&(d=""+b.key);if(a.type&&a.type.defaultProps)var f=a.type.defaultProps;for(k in b)K.call(b,k)&&!L.hasOwnProperty(k)&&(e[k]=void 0===b[k]&&void 0!==f?f[k]:b[k])}var k=arguments.length-2;if(1===k)e.children=c;else if(1<k){f=Array(k);for(var m=0;m<k;m++)f[m]=arguments[m+2];e.children=f}return{$$typeof:p,type:a.type,key:d,ref:g,props:e,_owner:l}},createFactory:function(a){var b=M.bind(null,a);b.type=a;return b},isValidElement:N,version:"16.12.0",
 __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED:{ReactCurrentDispatcher:I,ReactCurrentBatchConfig:{suspense:null},ReactCurrentOwner:J,IsSomeRendererActing:{current:!1},assign:h}},Y={default:X},Z=Y&&X||Y;module.exports=Z.default||Z;
 
-},{"object-assign":5}],14:[function(require,module,exports){
+},{"object-assign":7}],16:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -31354,7 +31562,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this,require('_process'))
-},{"./cjs/react.development.js":12,"./cjs/react.production.min.js":13,"_process":6}],15:[function(require,module,exports){
+},{"./cjs/react.development.js":14,"./cjs/react.production.min.js":15,"_process":8}],17:[function(require,module,exports){
 (function (process){
 /** @license React v0.18.0
  * scheduler-tracing.development.js
@@ -31781,7 +31989,7 @@ exports.unstable_unsubscribe = unstable_unsubscribe;
 }
 
 }).call(this,require('_process'))
-},{"_process":6}],16:[function(require,module,exports){
+},{"_process":8}],18:[function(require,module,exports){
 /** @license React v0.18.0
  * scheduler-tracing.production.min.js
  *
@@ -31793,7 +32001,7 @@ exports.unstable_unsubscribe = unstable_unsubscribe;
 
 'use strict';Object.defineProperty(exports,"__esModule",{value:!0});var b=0;exports.__interactionsRef=null;exports.__subscriberRef=null;exports.unstable_clear=function(a){return a()};exports.unstable_getCurrent=function(){return null};exports.unstable_getThreadID=function(){return++b};exports.unstable_trace=function(a,d,c){return c()};exports.unstable_wrap=function(a){return a};exports.unstable_subscribe=function(){};exports.unstable_unsubscribe=function(){};
 
-},{}],17:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 (function (process){
 /** @license React v0.18.0
  * scheduler.development.js
@@ -32701,7 +32909,7 @@ exports.unstable_Profiling = unstable_Profiling;
 }
 
 }).call(this,require('_process'))
-},{"_process":6}],18:[function(require,module,exports){
+},{"_process":8}],20:[function(require,module,exports){
 /** @license React v0.18.0
  * scheduler.production.min.js
  *
@@ -32725,7 +32933,7 @@ exports.unstable_scheduleCallback=function(a,b,c){var d=exports.unstable_now();i
 exports.unstable_wrapCallback=function(a){var b=R;return function(){var c=R;R=b;try{return a.apply(this,arguments)}finally{R=c}}};exports.unstable_getCurrentPriorityLevel=function(){return R};exports.unstable_shouldYield=function(){var a=exports.unstable_now();V(a);var b=L(N);return b!==Q&&null!==Q&&null!==b&&null!==b.callback&&b.startTime<=a&&b.expirationTime<Q.expirationTime||k()};exports.unstable_requestPaint=Z;exports.unstable_continueExecution=function(){T||S||(T=!0,f(X))};
 exports.unstable_pauseExecution=function(){};exports.unstable_getFirstCallbackNode=function(){return L(N)};exports.unstable_Profiling=null;
 
-},{}],19:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -32736,7 +32944,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this,require('_process'))
-},{"./cjs/scheduler.development.js":17,"./cjs/scheduler.production.min.js":18,"_process":6}],20:[function(require,module,exports){
+},{"./cjs/scheduler.development.js":19,"./cjs/scheduler.production.min.js":20,"_process":8}],22:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -32747,4 +32955,4 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this,require('_process'))
-},{"./cjs/scheduler-tracing.development.js":15,"./cjs/scheduler-tracing.production.min.js":16,"_process":6}]},{},[4]);
+},{"./cjs/scheduler-tracing.development.js":17,"./cjs/scheduler-tracing.production.min.js":18,"_process":8}]},{},[6]);

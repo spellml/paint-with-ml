@@ -1,0 +1,40 @@
+#frame {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 10px;
+    grid-auto-rows: minmax(100px, auto);
+}
+#canvas-container {
+    grid-column: 1;
+    grid-row: 1;
+}
+#build_button { 
+    grid-column: 2;
+    grid-row: 1;
+}
+#output {
+    grid-column: 3;
+    grid-row: 1;
+}
+#toolbox-container {
+    grid-column: 1;
+    grid-row: 2;
+}
+#spacer {
+    grid-column: 2;
+    grid-row: 2;
+}
+#social_sharer {
+    grid-column: 3;
+    grid-row: 2;
+}
+#buttons-container {
+    display: grid;
+    width: 512px;
+    grid-template-columns: repeat(9, 50px);
+    justify-content: space-between;
+}
+.class-selector {
+    border-radius:15px;
+    font-size: 30px;
+}

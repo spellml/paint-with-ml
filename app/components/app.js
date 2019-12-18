@@ -1,6 +1,7 @@
 import React from 'react';
 import { Component } from 'react';
 import Canvas from './canvas';
+import Toolbox from './toolbox';
 
 
 class App extends Component {
@@ -23,18 +24,38 @@ class App extends Component {
             // current brush size
             // 512x512 pixel state array
         }
+
+        this.onButtonClick = this.onButtonClick.bind(this);
+    }
+
+    onButtonClick(n) {
+        return () => this.setState(Object.assign({}, this.state, {'tool_value': n}));
     }
 
     render() {
-        return <Canvas
-            id="draw_space"
-            width="512"
-            height="512"
-            tool={this.state.tool}
-            tool_radius={this.state.tool_radius}
-            tool_value={this.state.tool_value}
-            ref={this.canvasRef}
-        />
+        return <div id='frame'>
+            <div id='canvas-container'>
+                <Canvas
+                    id='canvas'
+                    width="512"
+                    height="512"
+                    tool={this.state.tool}
+                    tool_radius={this.state.tool_radius}
+                    tool_value={this.state.tool_value}
+                    ref={this.canvasRef}
+                />
+            </div>
+            <div id='build_button'>built_button</div>
+            <div id='output'>output</div>
+            <div id='toolbox-container'>
+                <Toolbox
+                    id='toolbox'
+                    onButtonClick={this.onButtonClick}
+                />
+            </div>
+            <div id='spacer'>spacer</div>
+            <div id='socal_sharer'>social_shrarer</div>
+        </div>
     }
 
 }
