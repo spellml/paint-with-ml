@@ -80,10 +80,7 @@ class App extends Component {
     onToolboxToolButtonClick(t) {
         return () => {
             if (t === 'reset') {
-                let segmap = this.getDefaultCanvas();
-                this.setState(Object.assign({}, this.state, {'segmap': segmap}), () => {
-                    this.canvasRef.ctx.putImageData(new ImageData(segmap, 512, 512), 0, 0);
-                });
+                this.updateSegmentationMap(this.getDefaultCanvas());
             } else {
                 this.setState(Object.assign({}, this.state, {'tool': t}));
             }
@@ -96,7 +93,14 @@ class App extends Component {
     }
 
     updateSegmentationMap(segmap) {
-        return this.setState(Object.assign({}, this.state, {'segmap': segmap}));
+        // React state updates are asynchronous, which means they return immediately,
+        // which means that any code updating the canvas that uses object props or state
+        // run immediately after a state update will use stale state values. To perform
+        // the repaint correctly---update state first, and then immediately repaint---
+        // we have to apply the repaint as a callback on the state update.
+        this.setState(Object.assign({}, this.state, {'segmap': segmap}), () => {
+            this.canvasRef.ctx.putImageData(new ImageData(segmap, 512, 512), 0, 0);
+        });
     }
 
     getDefaultCanvas() {

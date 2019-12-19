@@ -140,13 +140,7 @@ function (_Component) {
 
       return function () {
         if (t === 'reset') {
-          var segmap = _this3.getDefaultCanvas();
-
-          _this3.setState(Object.assign({}, _this3.state, {
-            'segmap': segmap
-          }), function () {
-            _this3.canvasRef.ctx.putImageData(new ImageData(segmap, 512, 512), 0, 0);
-          });
+          _this3.updateSegmentationMap(_this3.getDefaultCanvas());
         } else {
           _this3.setState(Object.assign({}, _this3.state, {
             'tool': t
@@ -163,9 +157,18 @@ function (_Component) {
   }, {
     key: "updateSegmentationMap",
     value: function updateSegmentationMap(segmap) {
-      return this.setState(Object.assign({}, this.state, {
+      var _this4 = this;
+
+      // React state updates are asynchronous, which means they return immediately,
+      // which means that any code updating the canvas that uses object props or state
+      // run immediately after a state update will use stale state values. To perform
+      // the repaint correctly---update state first, and then immediately repaint---
+      // we have to apply the repaint as a callback on the state update.
+      this.setState(Object.assign({}, this.state, {
         'segmap': segmap
-      }));
+      }), function () {
+        _this4.canvasRef.ctx.putImageData(new ImageData(segmap, 512, 512), 0, 0);
+      });
     }
   }, {
     key: "getDefaultCanvas",
@@ -193,7 +196,7 @@ function (_Component) {
   }, {
     key: "render",
     value: function render() {
-      var _this4 = this;
+      var _this5 = this;
 
       return _react["default"].createElement("div", {
         id: "frame"
@@ -210,7 +213,7 @@ function (_Component) {
         updateSegmentationMap: this.updateSegmentationMap,
         color_key: this.color_key,
         ref: function ref(canvas) {
-          return _this4.canvasRef = canvas;
+          return _this5.canvasRef = canvas;
         }
       })), _react["default"].createElement("div", {
         id: "build-button-container"
@@ -455,36 +458,13 @@ function (_Component) {
   }, {
     key: "paint",
     value: function paint(e) {
-      var _this2 = this;
-
       var x = e.pageX - e.target.offsetLeft;
       var y = e.pageY - e.target.offsetTop;
 
       if (this.props.tool === 'pen' || this.props.tool === 'eraser') {
-        // React state updates are asynchronous, which means they return immediately,
-        // which means that any code updating the canvas that uses object props or state
-        // run immediately after a state update will use stale state values. To perform
-        // the repaint correctly---update state first, and then immeidately repaint---
-        // we have to apply the repaint as a callback on the state update.
-        // TODO: figure out this better solution
-        // updateSegmentationMap(segmap , () => {
-        //     this.ctx.putImageData(new ImageData(segmap, 512, 512), 0, 0);
-        // })
-        var synchronizeUpdate = function synchronizeUpdate() {
-          return new Promise(function (resolve, _) {
-            updateSegmentationMap(segmap);
-            resolve();
-          });
-        };
-
         var tool_value = this.props.tool === 'pen' ? this.props.tool_value : 9;
         var segmap = this.penMatrix(x, y, this.props.tool_radius, tool_value);
-        var updateSegmentationMap = this.props.updateSegmentationMap;
-        synchronizeUpdate().then(function () {
-          var img = new ImageData(_this2.props.segmap, 512, 512);
-
-          _this2.ctx.putImageData(img, 0, 0);
-        });
+        this.props.updateSegmentationMap(segmap);
       } else if (this.props.tool === 'bucket') {// TODO
       } else if (this.props.tool === 'reset') {
         console.log("HELLO");

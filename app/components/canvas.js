@@ -14,7 +14,7 @@ class Canvas extends Component {
         this.onMouseUp = this.onMouseUp.bind(this);
         this.onMouseMove = this.onMouseMove.bind(this);
     }
-    
+
     saveContext(ctx) {
         this.ctx = ctx;
         this.width = this.ctx.canvas.width;
@@ -63,27 +63,7 @@ class Canvas extends Component {
         if (this.props.tool === 'pen' || this.props.tool === 'eraser') {
             let tool_value = this.props.tool === 'pen' ? this.props.tool_value : 9;
             let segmap = this.penMatrix(x, y, this.props.tool_radius, tool_value);
-            let updateSegmentationMap = this.props.updateSegmentationMap;
-   
-            // React state updates are asynchronous, which means they return immediately,
-            // which means that any code updating the canvas that uses object props or state
-            // run immediately after a state update will use stale state values. To perform
-            // the repaint correctly---update state first, and then immediately repaint---
-            // we have to apply the repaint as a callback on the state update.
-            // TODO: figure out this better solution to this.
-            // updateSegmentationMap(segmap , () => {
-            //     this.ctx.putImageData(new ImageData(segmap, 512, 512), 0, 0);
-            // })
-            function synchronizeUpdate() {
-                return new Promise((resolve, _) => {
-                    updateSegmentationMap(segmap);
-                    resolve();
-                });
-            }
-            synchronizeUpdate().then(() => {
-                let img = new ImageData(this.props.segmap, 512, 512);
-                this.ctx.putImageData(img, 0, 0);    
-            });
+            this.props.updateSegmentationMap(segmap);
         } else if (this.props.tool === 'bucket') {
             // TODO
         } else if (this.props.tool === 'reset') {
