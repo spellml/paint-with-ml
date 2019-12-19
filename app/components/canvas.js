@@ -91,8 +91,8 @@ class Canvas extends Component {
     }
 
     onClick(e) {
-        // TODO
-        // this.paint(e);
+        console.log("HELLO");
+        this.paint(e);
     }
 
     componentDidMount(){

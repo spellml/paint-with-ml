@@ -135,7 +135,7 @@ function (_Component) {
   }, {
     key: "onBuildButtonClick",
     value: function onBuildButtonClick() {
-      // TODO: implement.
+      // TODO: implement this logic.
       console.log('Clicked!');
     }
   }, {
@@ -478,8 +478,9 @@ function (_Component) {
     }
   }, {
     key: "onClick",
-    value: function onClick(e) {// TODO
-      // this.paint(e);
+    value: function onClick(e) {
+      console.log("HELLO");
+      this.paint(e);
     }
   }, {
     key: "componentDidMount",
