@@ -141,7 +141,7 @@ function (_Component) {
   }, {
     key: "updateSegmentationMap",
     value: function updateSegmentationMap(segmap) {
-      this.setState(Object.assign({}, this.state, {
+      return this.setState(Object.assign({}, this.state, {
         'segmap': segmap
       }));
     }
@@ -171,11 +171,14 @@ function (_Component) {
   }, {
     key: "paintDefaultCanvas",
     value: function paintDefaultCanvas() {
-      console.log("HELLO");
+      var _this4 = this;
+
       var segmap = this.getDefaultCanvas();
-      this.setState(Object.assign({}, this.state, {
-        'segmap': segmap
-      }));
+      return new Promise(function (resolve) {
+        _this4.setState(Object.assign({}, _this4.state, {
+          'segmap': segmap
+        }), resolve);
+      });
     }
   }, {
     key: "render",
@@ -439,23 +442,27 @@ function (_Component) {
   }, {
     key: "paint",
     value: function paint(e) {
+      var _this2 = this;
+
       var x = e.pageX - e.target.offsetLeft;
       var y = e.pageY - e.target.offsetTop;
 
-      if (this.props.tool === 'pen') {
-        // TODO
-        var segmap = this.penMatrix(x, y, this.props.tool_radius, this.props.tool_value);
-        this.props.updateSegmentationMap(segmap);
-        var img = new ImageData(this.props.segmap, 512, 512);
-        this.ctx.putImageData(img, 0, 0);
-      } else if (this.props.tool === 'eraser') {
-        var _segmap = this.penMatrix(x, y, this.props.tool_radius, 9);
+      if (this.props.tool === 'pen' || this.props.tool === 'eraser') {
+        var synchronizeUpdate = function synchronizeUpdate() {
+          return new Promise(function (resolve, _) {
+            updateSegmentationMap(segmap);
+            resolve();
+          });
+        };
 
-        this.props.updateSegmentationMap(_segmap);
+        var tool_value = this.props.tool === 'pen' ? this.props.tool_value : 9;
+        var segmap = this.penMatrix(x, y, this.props.tool_radius, tool_value);
+        var updateSegmentationMap = this.props.updateSegmentationMap;
+        synchronizeUpdate().then(function () {
+          var img = new ImageData(_this2.props.segmap, 512, 512);
 
-        var _img = new ImageData(this.props.segmap, 512, 512);
-
-        this.ctx.putImageData(_img, 0, 0);
+          _this2.ctx.putImageData(img, 0, 0);
+        });
       } else if (this.props.tool === 'bucket') {// TODO
       }
     }

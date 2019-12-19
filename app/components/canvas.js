@@ -60,17 +60,21 @@ class Canvas extends Component {
         let x = e.pageX - e.target.offsetLeft;
         let y = e.pageY - e.target.offsetTop;
 
-        if (this.props.tool === 'pen') {
-            // TODO
-            let segmap = this.penMatrix(x, y, this.props.tool_radius, this.props.tool_value);
-            this.props.updateSegmentationMap(segmap);
-            let img = new ImageData(this.props.segmap, 512, 512);
-            this.ctx.putImageData(img, 0, 0);
-        } else if (this.props.tool === 'eraser') {
-            let segmap = this.penMatrix(x, y, this.props.tool_radius, 9);
-            this.props.updateSegmentationMap(segmap);
-            let img = new ImageData(this.props.segmap, 512, 512);
-            this.ctx.putImageData(img, 0, 0);
+        if (this.props.tool === 'pen' || this.props.tool === 'eraser') {
+            let tool_value = this.props.tool === 'pen' ? this.props.tool_value : 9;
+            let segmap = this.penMatrix(x, y, this.props.tool_radius, tool_value);
+            let updateSegmentationMap = this.props.updateSegmentationMap;
+   
+            function synchronizeUpdate() {
+                return new Promise((resolve, _) => {
+                    updateSegmentationMap(segmap);
+                    resolve();
+                });
+            }
+            synchronizeUpdate().then(() => {
+                let img = new ImageData(this.props.segmap, 512, 512);
+                this.ctx.putImageData(img, 0, 0);    
+            });
         } else if (this.props.tool === 'bucket') {
             // TODO
         }

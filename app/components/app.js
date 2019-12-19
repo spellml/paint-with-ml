@@ -77,7 +77,7 @@ class App extends Component {
     }
 
     updateSegmentationMap(segmap) {
-        this.setState(Object.assign({}, this.state, {'segmap': segmap}));
+        return this.setState(Object.assign({}, this.state, {'segmap': segmap}));
     }
 
     getDefaultCanvas() {
@@ -98,9 +98,10 @@ class App extends Component {
     }
 
     paintDefaultCanvas() {
-        console.log("HELLO");
         let segmap = this.getDefaultCanvas();
-        this.setState(Object.assign({}, this.state, {'segmap': segmap}));
+        this.setState(Object.assign({}, this.state, {'segmap': segmap}), () => {
+            // TODO
+        });
     }
 
     render() {
