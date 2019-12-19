@@ -1,7 +1,7 @@
 #frame {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    grid-gap: 10px;
+    grid-gap: 0px;
     grid-auto-rows: minmax(100px, auto);
 }
 #canvas-container {
@@ -28,13 +28,23 @@
     grid-column: 3;
     grid-row: 2;
 }
-#buttons-container {
+#label-buttons-container {
     display: grid;
     width: 512px;
     grid-template-columns: repeat(9, 50px);
     justify-content: space-between;
 }
-.class-selector {
+#tool-buttons-container {
+    display: grid;
+    width: 512px;
+    grid-template-columns: repeat(4, 50px);
+    justify-content: space-between;
+}
+.class-selector, .build-button, .tool-selector {
     border-radius:15px;
     font-size: 30px;
+}
+#build-button-container {
+    display: flex;
+    align-items: center;
 }

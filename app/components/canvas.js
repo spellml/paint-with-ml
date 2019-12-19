@@ -7,44 +7,6 @@ class Canvas extends Component {
     constructor(props) {
         super(props);
 
-        this.color_key = {
-            0: [241, 159, 240, 255],
-            1: [154, 153,  64, 255],
-            2: [255, 253,  57, 255],
-            3: [50, 0, 50, 255],
-            4: [249,  40,  55, 255],
-            5: [50, 0, 0, 255],
-            6: [45, 255, 254, 255],
-            7: [62, 110, 122, 255],
-            8: [0, 50, 50, 255],
-            9: [255, 255, 255, 255],  // unset
-        }
-        // this.label_key = {
-        //     0: 'sky',
-        //     1: 'tree',
-        //     2: 'grass',
-        //     3: 'earth',
-        //     4: 'mountain',
-        //     5: 'plant',
-        //     6: 'water',
-        //     7: 'sea',
-        //     8: 'river'
-        // }
-        let segmap = new Uint8ClampedArray(512 * 512 * 4);
-        let default_skybox_top_color = this.color_key[0];
-        let default_skybox_bottom_color = this.color_key[2];
-        for (let x of [...Array(512).keys()]) {
-            for (let y of [...Array(512).keys()]) {
-                const color = y <= 256 ? default_skybox_top_color : default_skybox_bottom_color;
-                const pos = (y * 512 * 4) + (x * 4);
-                segmap[pos] = color[0];
-                segmap[pos + 1] = color[1];
-                segmap[pos + 2] = color[2];
-                segmap[pos + 3] = color[3];
-            }
-        }
-        this.state = {'segmap': segmap};
-
         // TODO: recall (and write here) why this bind operation is necessary.
         this.saveContext = this.saveContext.bind(this);
         this.onClick = this.onClick.bind(this);
@@ -60,10 +22,10 @@ class Canvas extends Component {
     }
 
     penMatrix(cx, cy, r, v) {
-        let segmap = this.state.segmap.slice();
+        let segmap = this.props.segmap.slice();
         let [xmin, xmax] = [Math.max(0, cx - r), Math.min(512, cx + r)];
         let [ymin, ymax] = [Math.max(0, cy - r), Math.min(512, cy + r)];
-        let color = this.color_key[v];
+        let color = this.props.color_key[v];
 
         for (let x of [...Array(xmax - xmin).keys()].map(v => v + xmin)) {
             for (let y of [...Array(ymax - ymin).keys()].map(v => v + ymin)) {
@@ -84,7 +46,7 @@ class Canvas extends Component {
     //     for (let x of [...Array(512).keys()]) {
     //         for (let y of [...Array(512).keys()]) {
     //             const pos = (x * 512 * 4) + (y * 4);
-    //             const color = this.color_key[segmap[x][y]];
+    //             const color = this.props.color_key[segmap[x][y]];
     //             out[pos] = color[0];
     //             out[pos + 1] = color[1];
     //             out[pos + 2] = color[2];
@@ -101,17 +63,14 @@ class Canvas extends Component {
         if (this.props.tool === 'pen') {
             // TODO
             let segmap = this.penMatrix(x, y, this.props.tool_radius, this.props.tool_value);
-            this.setState(
-                Object.assign({}, this.state, {'segmap': segmap})
-            );
-            let img = new ImageData(this.state.segmap, 512, 512);
+            this.props.updateSegmentationMap(segmap);
+            let img = new ImageData(this.props.segmap, 512, 512);
             this.ctx.putImageData(img, 0, 0);
         } else if (this.props.tool === 'eraser') {
             let segmap = this.penMatrix(x, y, this.props.tool_radius, 9);
-            this.setState(Object.assign({}, this.state, {'segmap': segmap}));
-            let img = new ImageData(this.state.segmap, 512, 512);
+            this.props.updateSegmentationMap(segmap);
+            let img = new ImageData(this.props.segmap, 512, 512);
             this.ctx.putImageData(img, 0, 0);
-            // TODO
         } else if (this.props.tool === 'bucket') {
             // TODO
         }
@@ -137,7 +96,7 @@ class Canvas extends Component {
     }
 
     componentDidMount(){
-        const img = new ImageData(this.state.segmap, 512, 512);
+        const img = new ImageData(this.props.segmap, 512, 512);
         this.ctx.putImageData(img, 0, 0);
     }
 

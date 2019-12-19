@@ -2,7 +2,7 @@ import React from 'react';
 import { Component } from 'react';
 
 
-class ToolboxButton extends Component {
+class ToolboxLabelButton extends Component {
     render() {
         return <button
             className='class-selector'
@@ -13,4 +13,4 @@ class ToolboxButton extends Component {
     }
 }
 
-export default ToolboxButton;
+export default ToolboxLabelButton;
