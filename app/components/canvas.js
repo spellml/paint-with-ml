@@ -77,6 +77,8 @@ class Canvas extends Component {
             });
         } else if (this.props.tool === 'bucket') {
             // TODO
+        } else if (this.props.tool === 'reset') {
+            console.log("HELLO");
         }
     }
 
@@ -95,30 +97,12 @@ class Canvas extends Component {
     }
 
     onClick(e) {
-        console.log("HELLO");
         this.paint(e);
     }
 
     componentDidMount(){
         const img = new ImageData(this.props.segmap, 512, 512);
         this.ctx.putImageData(img, 0, 0);
-    }
-
-    componentDidUpdate() {
-        // const { angle } = this.props;
-        // this.ctx.save();
-        // this.ctx.beginPath();
-        // this.ctx.clearRect(0, 0, this.width, this.height);
-        // this.ctx.translate(this.width / 2, this.height / 2);
-        // this.ctx.rotate((angle * Math.PI) / 180);
-        // this.ctx.fillStyle = '#4397AC';
-        // this.ctx.fillRect(
-        // -this.width / 4,
-        // -this.height / 4,
-        // this.width / 2,
-        // this.height / 2
-        // );
-        // this.ctx.restore();
     }
 
     render() {

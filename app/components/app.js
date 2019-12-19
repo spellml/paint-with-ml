@@ -16,8 +16,20 @@ class App extends Component {
         //
         // React refs, used here, are the escape hatch specifically designed for cases like this.
         // cf. https://philna.sh/blog/2018/09/27/techniques-for-animating-on-the-canvas-in-react/
-        this.canvasRef = React.createRef();
-
+        //
+        // Note: this code attaches a reference to the canvas object in the frame object using
+        // the following code:
+        //
+        //     ref={this.canvasRef}
+        //
+        // I found that this works...only some of the time? App needs a reference to the
+        // Canvas.ctx property in order to be able to reset the canvas to the default value when
+        // the reset button is clicked, but at that time this value is set to null. The following
+        // code works as expected:
+        //
+        //     ref={(canvas) => this.canvasRef = canvas}
+        //
+        // I am not sure whether or not this is an error in the original blog post.
         this.color_key = {
             0: [241, 159, 240, 255],
             1: [154, 153,  64, 255],
@@ -47,9 +59,6 @@ class App extends Component {
             'tool': 'pen',
             'tool_radius': 10,
             'tool_value': 2
-            // current tool (brush, bucket, eraser)
-            // current brush size
-            // 512x512 pixel state array
         }
         this.onToolboxLabelButtonClick = this.onToolboxLabelButtonClick.bind(this);
         this.onToolboxToolButtonClick = this.onToolboxToolButtonClick.bind(this);
@@ -58,13 +67,18 @@ class App extends Component {
     }
 
     onToolboxLabelButtonClick(n) {
-        return () => this.setState(Object.assign({}, this.state, {'tool_value': n}));
+        return () => {
+            let tool = this.state.tool === 'eraser' ? 'pen' : this.state.tool;
+            this.setState(Object.assign({}, this.state, {'tool': tool, 'tool_value': n}));
+        }
     }
 
     onToolboxToolButtonClick(t) {
         return () => {
             if (t === 'reset') {
                 this.paintDefaultCanvas();
+            }   else if (t === 'eraser') {
+                this.setState(Object.assign({}, this.state, {'tool': t, 'tool_value': 9}));
             } else {
                 this.setState(Object.assign({}, this.state, {'tool': t}));
             }
@@ -100,7 +114,7 @@ class App extends Component {
     paintDefaultCanvas() {
         let segmap = this.getDefaultCanvas();
         this.setState(Object.assign({}, this.state, {'segmap': segmap}), () => {
-            // TODO
+            this.canvasRef.ctx.putImageData(new ImageData(segmap, 512, 512), 0, 0);
         });
     }
 
@@ -117,8 +131,7 @@ class App extends Component {
                     segmap={this.state.segmap}
                     updateSegmentationMap={this.updateSegmentationMap}
                     color_key={this.color_key}
-                    paintDefaultCanvas={this.paintDefaultCanvas}
-                    ref={this.canvasRef}
+                    ref={(canvas) => this.canvasRef = canvas}
                 />
             </div>
             <div id='build-button-container'>

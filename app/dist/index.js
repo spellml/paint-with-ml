@@ -62,8 +62,21 @@ function (_Component) {
     //
     // React refs, used here, are the escape hatch specifically designed for cases like this.
     // cf. https://philna.sh/blog/2018/09/27/techniques-for-animating-on-the-canvas-in-react/
+    //
+    // Note: this code attaches a reference to the canvas object in the frame object using
+    // the following code:
+    //
+    //     ref={this.canvasRef}
+    //
+    // I found that this works...only some of the time? App needs a reference to the
+    // Canvas.ctx property in order to be able to reset the canvas to the default value when
+    // the reset button is clicked, but at that time this value is set to null. The following
+    // code works as expected:
+    //
+    //     ref={(canvas) => this.canvasRef = canvas}
+    //
+    // I am not sure whether or not this is an error in the original blog post.
 
-    _this.canvasRef = _react["default"].createRef();
     _this.color_key = {
       0: [241, 159, 240, 255],
       1: [154, 153, 64, 255],
@@ -94,10 +107,7 @@ function (_Component) {
       'segmap': segmap,
       'tool': 'pen',
       'tool_radius': 10,
-      'tool_value': 2 // current tool (brush, bucket, eraser)
-      // current brush size
-      // 512x512 pixel state array
-
+      'tool_value': 2
     };
     _this.onToolboxLabelButtonClick = _this.onToolboxLabelButtonClick.bind(_assertThisInitialized(_this));
     _this.onToolboxToolButtonClick = _this.onToolboxToolButtonClick.bind(_assertThisInitialized(_this));
@@ -112,7 +122,10 @@ function (_Component) {
       var _this2 = this;
 
       return function () {
-        return _this2.setState(Object.assign({}, _this2.state, {
+        var tool = _this2.state.tool === 'eraser' ? 'pen' : _this2.state.tool;
+
+        _this2.setState(Object.assign({}, _this2.state, {
+          'tool': tool,
           'tool_value': n
         }));
       };
@@ -123,8 +136,15 @@ function (_Component) {
       var _this3 = this;
 
       return function () {
+        console.log('HELLO WORLD');
+
         if (t === 'reset') {
           _this3.paintDefaultCanvas();
+        } else if (t === 'eraser') {
+          _this3.setState(Object.assign({}, _this3.state, {
+            'tool': t,
+            'tool_value': 9
+          }));
         } else {
           _this3.setState(Object.assign({}, _this3.state, {
             'tool': t
@@ -174,15 +194,17 @@ function (_Component) {
       var _this4 = this;
 
       var segmap = this.getDefaultCanvas();
-      return new Promise(function (resolve) {
-        _this4.setState(Object.assign({}, _this4.state, {
-          'segmap': segmap
-        }), resolve);
+      this.setState(Object.assign({}, this.state, {
+        'segmap': segmap
+      }), function () {
+        _this4.canvasRef.ctx.putImageData(new ImageData(segmap, 512, 512), 0, 0);
       });
     }
   }, {
     key: "render",
     value: function render() {
+      var _this5 = this;
+
       return _react["default"].createElement("div", {
         id: "frame"
       }, _react["default"].createElement("div", {
@@ -197,8 +219,9 @@ function (_Component) {
         segmap: this.state.segmap,
         updateSegmentationMap: this.updateSegmentationMap,
         color_key: this.color_key,
-        paintDefaultCanvas: this.paintDefaultCanvas,
-        ref: this.canvasRef
+        ref: function ref(canvas) {
+          return _this5.canvasRef = canvas;
+        }
       })), _react["default"].createElement("div", {
         id: "build-button-container"
       }, _react["default"].createElement(_build_button["default"], {
@@ -464,6 +487,8 @@ function (_Component) {
           _this2.ctx.putImageData(img, 0, 0);
         });
       } else if (this.props.tool === 'bucket') {// TODO
+      } else if (this.props.tool === 'reset') {
+        console.log("HELLO");
       }
     }
   }, {
@@ -486,7 +511,6 @@ function (_Component) {
   }, {
     key: "onClick",
     value: function onClick(e) {
-      console.log("HELLO");
       this.paint(e);
     }
   }, {
@@ -494,23 +518,6 @@ function (_Component) {
     value: function componentDidMount() {
       var img = new ImageData(this.props.segmap, 512, 512);
       this.ctx.putImageData(img, 0, 0);
-    }
-  }, {
-    key: "componentDidUpdate",
-    value: function componentDidUpdate() {// const { angle } = this.props;
-      // this.ctx.save();
-      // this.ctx.beginPath();
-      // this.ctx.clearRect(0, 0, this.width, this.height);
-      // this.ctx.translate(this.width / 2, this.height / 2);
-      // this.ctx.rotate((angle * Math.PI) / 180);
-      // this.ctx.fillStyle = '#4397AC';
-      // this.ctx.fillRect(
-      // -this.width / 4,
-      // -this.height / 4,
-      // this.width / 2,
-      // this.height / 2
-      // );
-      // this.ctx.restore();
     }
   }, {
     key: "render",
