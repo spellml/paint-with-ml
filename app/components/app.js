@@ -60,10 +60,14 @@ class App extends Component {
             'tool_radius': 10,
             'tool_value': 2
         }
+
+        // These event handlers are passed down to and actually called within the child components,
+        // at which point 'this' is a reference to that child component class object. To retain
+        // a reference to the App component object instead, so that we can update the state of
+        // the App object as necessary, we bind the 'this' references to the App object here.
         this.onToolboxLabelButtonClick = this.onToolboxLabelButtonClick.bind(this);
         this.onToolboxToolButtonClick = this.onToolboxToolButtonClick.bind(this);
         this.updateSegmentationMap = this.updateSegmentationMap.bind(this);
-        this.paintDefaultCanvas = this.paintDefaultCanvas.bind(this);
     }
 
     onToolboxLabelButtonClick(n) {
@@ -76,9 +80,10 @@ class App extends Component {
     onToolboxToolButtonClick(t) {
         return () => {
             if (t === 'reset') {
-                this.paintDefaultCanvas();
-            }   else if (t === 'eraser') {
-                this.setState(Object.assign({}, this.state, {'tool': t, 'tool_value': 9}));
+                let segmap = this.getDefaultCanvas();
+                this.setState(Object.assign({}, this.state, {'segmap': segmap}), () => {
+                    this.canvasRef.ctx.putImageData(new ImageData(segmap, 512, 512), 0, 0);
+                });
             } else {
                 this.setState(Object.assign({}, this.state, {'tool': t}));
             }
@@ -109,13 +114,6 @@ class App extends Component {
             }
         }
         return segmap;
-    }
-
-    paintDefaultCanvas() {
-        let segmap = this.getDefaultCanvas();
-        this.setState(Object.assign({}, this.state, {'segmap': segmap}), () => {
-            this.canvasRef.ctx.putImageData(new ImageData(segmap, 512, 512), 0, 0);
-        });
     }
 
     render() {

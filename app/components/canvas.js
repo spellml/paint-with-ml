@@ -65,6 +65,15 @@ class Canvas extends Component {
             let segmap = this.penMatrix(x, y, this.props.tool_radius, tool_value);
             let updateSegmentationMap = this.props.updateSegmentationMap;
    
+            // React state updates are asynchronous, which means they return immediately,
+            // which means that any code updating the canvas that uses object props or state
+            // run immediately after a state update will use stale state values. To perform
+            // the repaint correctly---update state first, and then immediately repaint---
+            // we have to apply the repaint as a callback on the state update.
+            // TODO: figure out this better solution to this.
+            // updateSegmentationMap(segmap , () => {
+            //     this.ctx.putImageData(new ImageData(segmap, 512, 512), 0, 0);
+            // })
             function synchronizeUpdate() {
                 return new Promise((resolve, _) => {
                     updateSegmentationMap(segmap);

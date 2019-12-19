@@ -108,11 +108,14 @@ function (_Component) {
       'tool': 'pen',
       'tool_radius': 10,
       'tool_value': 2
-    };
+    }; // These event handlers are passed down to and actually called within the child components,
+    // at which point 'this' is a reference to that child component class object. To retain
+    // a reference to the App component object instead, so that we can update the state of
+    // the App object as necessary, we bind the 'this' references to the App object here.
+
     _this.onToolboxLabelButtonClick = _this.onToolboxLabelButtonClick.bind(_assertThisInitialized(_this));
     _this.onToolboxToolButtonClick = _this.onToolboxToolButtonClick.bind(_assertThisInitialized(_this));
     _this.updateSegmentationMap = _this.updateSegmentationMap.bind(_assertThisInitialized(_this));
-    _this.paintDefaultCanvas = _this.paintDefaultCanvas.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -136,15 +139,14 @@ function (_Component) {
       var _this3 = this;
 
       return function () {
-        console.log('HELLO WORLD');
-
         if (t === 'reset') {
-          _this3.paintDefaultCanvas();
-        } else if (t === 'eraser') {
+          var segmap = _this3.getDefaultCanvas();
+
           _this3.setState(Object.assign({}, _this3.state, {
-            'tool': t,
-            'tool_value': 9
-          }));
+            'segmap': segmap
+          }), function () {
+            _this3.canvasRef.ctx.putImageData(new ImageData(segmap, 512, 512), 0, 0);
+          });
         } else {
           _this3.setState(Object.assign({}, _this3.state, {
             'tool': t
@@ -189,21 +191,9 @@ function (_Component) {
       return segmap;
     }
   }, {
-    key: "paintDefaultCanvas",
-    value: function paintDefaultCanvas() {
-      var _this4 = this;
-
-      var segmap = this.getDefaultCanvas();
-      this.setState(Object.assign({}, this.state, {
-        'segmap': segmap
-      }), function () {
-        _this4.canvasRef.ctx.putImageData(new ImageData(segmap, 512, 512), 0, 0);
-      });
-    }
-  }, {
     key: "render",
     value: function render() {
-      var _this5 = this;
+      var _this4 = this;
 
       return _react["default"].createElement("div", {
         id: "frame"
@@ -220,7 +210,7 @@ function (_Component) {
         updateSegmentationMap: this.updateSegmentationMap,
         color_key: this.color_key,
         ref: function ref(canvas) {
-          return _this5.canvasRef = canvas;
+          return _this4.canvasRef = canvas;
         }
       })), _react["default"].createElement("div", {
         id: "build-button-container"
@@ -471,6 +461,15 @@ function (_Component) {
       var y = e.pageY - e.target.offsetTop;
 
       if (this.props.tool === 'pen' || this.props.tool === 'eraser') {
+        // React state updates are asynchronous, which means they return immediately,
+        // which means that any code updating the canvas that uses object props or state
+        // run immediately after a state update will use stale state values. To perform
+        // the repaint correctly---update state first, and then immeidately repaint---
+        // we have to apply the repaint as a callback on the state update.
+        // TODO: figure out this better solution
+        // updateSegmentationMap(segmap , () => {
+        //     this.ctx.putImageData(new ImageData(segmap, 512, 512), 0, 0);
+        // })
         var synchronizeUpdate = function synchronizeUpdate() {
           return new Promise(function (resolve, _) {
             updateSegmentationMap(segmap);
