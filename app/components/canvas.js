@@ -26,10 +26,12 @@ class Canvas extends Component {
         let [xmin, xmax] = [Math.max(0, cx - r), Math.min(512, cx + r)];
         let [ymin, ymax] = [Math.max(0, cy - r), Math.min(512, cy + r)];
         let color = this.props.color_key[v];
-
+        const dist = (cx, x, cy, y) => {
+            return (Math.abs(cx - x)**2 + Math.abs(cy - y)**2)**(1/2)
+        }
         for (let x of [...Array(xmax - xmin).keys()].map(v => v + xmin)) {
             for (let y of [...Array(ymax - ymin).keys()].map(v => v + ymin)) {
-                if (Math.abs(cx - x) + Math.abs(cy - y) <= r + 5) {
+                if (dist(cx, x, cy, y) <= r) {
                     const pos = (y * 512 * 4) + (x * 4);
                     segmap[pos] = color[0];
                     segmap[pos + 1] = color[1];
@@ -41,20 +43,48 @@ class Canvas extends Component {
         return segmap;
     }
 
-    // segmentationMapToArray(segmap) {
-    //     let out = new Uint8ClampedArray(512 * 512 * 4);
-    //     for (let x of [...Array(512).keys()]) {
-    //         for (let y of [...Array(512).keys()]) {
-    //             const pos = (x * 512 * 4) + (y * 4);
-    //             const color = this.props.color_key[segmap[x][y]];
-    //             out[pos] = color[0];
-    //             out[pos + 1] = color[1];
-    //             out[pos + 2] = color[2];
-    //             out[pos + 3] = color[3];
-    //         }
-    //     }
-    //     return out;
-    // }
+    bucketMatrix(cx, cy, v) {
+        // Assume that segmap[cx][cy] !== v
+        const new_color = this.props.color_key[v];
+        const getPixel = (x, y) => {
+            let pos = (y * 512 * 4) + (x * 4);
+            return segmap.slice(pos, pos + 4);                        
+        }
+        const paintPixel = (x, y) => {
+            let pos = (y * 512 * 4) + (x * 4);
+            [segmap[pos], segmap[pos + 1], segmap[pos + 2], segmap[pos + 3]] =
+                [new_color[0], new_color[1], new_color[2], new_color[3]];
+        }
+
+        let segmap = this.props.segmap.slice();
+        const target_color = getPixel(cx, cy);
+        const tc = JSON.stringify(target_color); // used for value-based comparisons
+
+        // TODO: using a list as a queue is slow because dequeue is O(N), improve implementation.
+        // TODO: guard the period of time during which this expensive operation is happening with
+        // a UI waiting event.
+        let queue = [[cx, cy]];
+
+        paintPixel(cx, cy);
+
+        const dirs = [[0, -1], [0, 1], [-1, 0], [1, 0]];
+        while (queue.length > 0) {
+            let [cx, cy] = queue.shift();
+            for (let dir of dirs) {
+                let [c_cx, c_cy] = [cx + dir[0], cy + dir[1]];
+                if ((c_cx < 0) || (c_cx >= 512) || (c_cy < 0) || (c_cy >= 512)) {
+                    continue;
+                }
+                let candidate_pixel_loc = [cx + dir[0], cy + dir[1]];
+                if (JSON.stringify(getPixel(...candidate_pixel_loc)) === tc) {
+                    paintPixel(...candidate_pixel_loc);
+                    queue.push(candidate_pixel_loc);
+                }
+            }
+        }
+
+        return segmap;
+    }
 
     paint(e) {
         let x = e.pageX - e.target.offsetLeft;
@@ -65,10 +95,12 @@ class Canvas extends Component {
             let segmap = this.penMatrix(x, y, this.props.tool_radius, tool_value);
             this.props.updateSegmentationMap(segmap);
         } else if (this.props.tool === 'bucket') {
-            // TODO
-        } else if (this.props.tool === 'reset') {
-            console.log("HELLO");
+            if (this.props.segmap[x][y] != this.props.tool_value) {
+                let segmap = this.bucketMatrix(x, y, this.props.tool_value);
+                this.props.updateSegmentationMap(segmap);
+            }
         }
+        // no need to handle 'reset', this is handled at the App level
     }
 
     onMouseDown() {

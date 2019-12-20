@@ -2,6 +2,7 @@ import React from 'react';
 import { Component } from 'react';
 import ToolboxLabelButton from './toolbox_label_button';
 import ToolboxToolButton from './toolbox_tool_button';
+import BrushSizeSlider from './brush_size_slider';
 
 
 class Toolbox extends Component {
@@ -80,6 +81,11 @@ class Toolbox extends Component {
                         classId={8}
                         classImage='💦'
                     />
+                </div>
+                <div id='brush-size-slider-container'>
+                    <BrushSizeSlider
+                        tool_radius={this.props.tool_radius}
+                        onChange={this.props.onBrushSizeSliderChange}/>
                 </div>
             </div>
         );

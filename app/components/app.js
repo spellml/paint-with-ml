@@ -67,6 +67,7 @@ class App extends Component {
         // the App object as necessary, we bind the 'this' references to the App object here.
         this.onToolboxLabelButtonClick = this.onToolboxLabelButtonClick.bind(this);
         this.onToolboxToolButtonClick = this.onToolboxToolButtonClick.bind(this);
+        this.onBrushSizeSliderChange = this.onBrushSizeSliderChange.bind(this);
         this.updateSegmentationMap = this.updateSegmentationMap.bind(this);
     }
 
@@ -90,6 +91,10 @@ class App extends Component {
     onBuildButtonClick() {
         // TODO: implement this logic.
         console.log('Clicked!');
+    }
+
+    onBrushSizeSliderChange(v) {
+        this.setState(Object.assign({}, this.state, {'tool_radius': v / 2}));
     }
 
     updateSegmentationMap(segmap) {
@@ -147,6 +152,8 @@ class App extends Component {
                     id='toolbox'
                     onLabelButtonClick={this.onToolboxLabelButtonClick}
                     onToolButtonClick={this.onToolboxToolButtonClick}
+                    tool_radius={this.state.tool_radius}
+                    onBrushSizeSliderChange={this.onBrushSizeSliderChange}
                 />
             </div>
             <div id='spacer'>spacer</div>
