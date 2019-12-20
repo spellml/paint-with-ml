@@ -7,7 +7,6 @@ class Canvas extends Component {
     constructor(props) {
         super(props);
 
-        // TODO: recall (and write here) why this bind operation is necessary.
         this.saveContext = this.saveContext.bind(this);
         this.onClick = this.onClick.bind(this);
         this.onMouseDown = this.onMouseDown.bind(this);
@@ -44,28 +43,30 @@ class Canvas extends Component {
     }
 
     bucketMatrix(cx, cy, v) {
-        // Assume that segmap[cx][cy] !== v
         const new_color = this.props.color_key[v];
-        const getPixel = (x, y) => {
+        const getPixel = (x, y, segmap) => {
             let pos = (y * 512 * 4) + (x * 4);
             return segmap.slice(pos, pos + 4);                        
         }
-        const paintPixel = (x, y) => {
+        const paintPixel = (x, y, segmap) => {
             let pos = (y * 512 * 4) + (x * 4);
             [segmap[pos], segmap[pos + 1], segmap[pos + 2], segmap[pos + 3]] =
                 [new_color[0], new_color[1], new_color[2], new_color[3]];
         }
 
+        const actual_color = getPixel(cx, cy, this.props.segmap);
+        const ac = JSON.stringify(actual_color); // used for value-based comparisons
         let segmap = this.props.segmap.slice();
-        const target_color = getPixel(cx, cy);
-        const tc = JSON.stringify(target_color); // used for value-based comparisons
+
+        // If the color of the current pixel is equivalent to the color of the bucket, do nothing.
+        const actual = JSON.stringify([...getPixel(cx, cy, this.props.segmap).values()]);
+        const target = JSON.stringify(this.props.color_key[v])
+        if (actual === target) { return segmap; }
 
         // TODO: using a list as a queue is slow because dequeue is O(N), improve implementation.
-        // TODO: guard the period of time during which this expensive operation is happening with
-        // a UI waiting event.
         let queue = [[cx, cy]];
 
-        paintPixel(cx, cy);
+        paintPixel(cx, cy, segmap);
 
         const dirs = [[0, -1], [0, 1], [-1, 0], [1, 0]];
         while (queue.length > 0) {
@@ -75,10 +76,10 @@ class Canvas extends Component {
                 if ((c_cx < 0) || (c_cx >= 512) || (c_cy < 0) || (c_cy >= 512)) {
                     continue;
                 }
-                let candidate_pixel_loc = [cx + dir[0], cy + dir[1]];
-                if (JSON.stringify(getPixel(...candidate_pixel_loc)) === tc) {
-                    paintPixel(...candidate_pixel_loc);
-                    queue.push(candidate_pixel_loc);
+                let cand_p_loc = [cx + dir[0], cy + dir[1]];
+                if (JSON.stringify(getPixel(cand_p_loc[0], cand_p_loc[1], segmap)) === ac) {
+                    paintPixel(cand_p_loc[0], cand_p_loc[1], segmap);
+                    queue.push(cand_p_loc);
                 }
             }
         }
@@ -94,21 +95,23 @@ class Canvas extends Component {
             let tool_value = this.props.tool === 'pen' ? this.props.tool_value : 9;
             let segmap = this.penMatrix(x, y, this.props.tool_radius, tool_value);
             this.props.updateSegmentationMap(segmap);
-        } else if (this.props.tool === 'bucket') {
-            if (this.props.segmap[x][y] != this.props.tool_value) {
-                let segmap = this.bucketMatrix(x, y, this.props.tool_value);
-                this.props.updateSegmentationMap(segmap);
-            }
         }
         // no need to handle 'reset', this is handled at the App level
+        // nn need to handle 'bucket', to conserve compute this is only performed on mouseup
     }
 
     onMouseDown() {
         this.mouse_down = true;
     }
 
-    onMouseUp() {
+    onMouseUp(e) {
         this.mouse_down = false;
+        if (this.props.tool === 'bucket') {
+            let x = e.pageX - e.target.offsetLeft;
+            let y = e.pageY - e.target.offsetTop;
+            let v = this.props.tool_value;
+            this.props.updateSegmentationMap(this.bucketMatrix(x, y, v));
+        }
     }
 
     onMouseMove(e) {

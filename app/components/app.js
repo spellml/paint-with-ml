@@ -43,6 +43,9 @@ class App extends Component {
             8: [0, 50, 50, 255],
             9: [255, 255, 255, 255],  // unset
         }
+        this.color_key_r = {};
+        Object.keys(this.color_key).forEach(v => this.color_key_r[this.color_key[v]] = v);
+
         // this.label_key = {
         //     0: 'sky',
         //     1: 'tree',
@@ -59,7 +62,9 @@ class App extends Component {
             'segmap': segmap,
             'tool': 'pen',
             'tool_radius': 10,
-            'tool_value': 2
+            'tool_value': 2,
+            'data_url': null,
+            'waiting': false
         }
 
         // These event handlers are passed down to and actually called within the child components,
@@ -98,6 +103,32 @@ class App extends Component {
         this.setState(Object.assign({}, this.state, {'tool_radius': v / 2}));
     }
 
+    canvasToDataURL() {
+        let rle = [];
+        let curr_n = 1;
+        let i = 4;
+        let curr_v = this.color_key_r[this.state.segmap.slice(0, 4).join()];
+        
+        while (i < this.state.segmap.length) {
+            let next_v = this.color_key_r[this.state.segmap.slice(i, i + 4).join()];
+            if (next_v === curr_v) {
+                curr_n += 1;
+            } else {
+                rle.push(`${curr_v}r${curr_n}`);
+                curr_n = 0;
+            }
+            curr_v = next_v;
+            i += 4;
+        }
+
+        if (curr_n > 0) {
+            rle.push(`${curr_v}r${curr_n}`);
+        }
+        rle = rle.join();
+        return rle;
+        // return btoa(rle);
+    }
+
     updateSegmentationMap(segmap) {
         // React state updates are asynchronous, which means they return immediately,
         // which means that any code updating the canvas that uses object props or state
@@ -106,6 +137,7 @@ class App extends Component {
         // we have to apply the repaint as a callback on the state update.
         this.setState(Object.assign({}, this.state, {'segmap': segmap}), () => {
             this.canvasRef.ctx.putImageData(new ImageData(segmap, 512, 512), 0, 0);
+            this.setState(Object.assign({}, this.state, {'data_url': url}));
         });
     }
 
