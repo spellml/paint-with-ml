@@ -3,6 +3,7 @@ import { Component } from 'react';
 import Canvas from './canvas';
 import Toolbox from './toolbox';
 import BuildButton from './build_button';
+import OutputPicture from './output_picture';
 
 
 class App extends Component {
@@ -146,7 +147,9 @@ class App extends Component {
                     onClick={this.onBuildButtonClick}
                 />
             </div>
-            <div id='output'>output</div>
+            <div id='output-container'>
+                <OutputPicture/>
+            </div>
             <div id='toolbox-container'>
                 <Toolbox
                     id='toolbox'
@@ -156,8 +159,8 @@ class App extends Component {
                     onBrushSizeSliderChange={this.onBrushSizeSliderChange}
                 />
             </div>
-            <div id='spacer'>spacer</div>
-            <div id='socal_sharer'>social_shrarer</div>
+            <div id='spacer'/>
+            <div id='socal-sharer-container'>social_shrarer</div>
         </div>
     }
 

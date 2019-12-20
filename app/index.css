@@ -8,11 +8,7 @@
     grid-column: 1;
     grid-row: 1;
 }
-#build_button { 
-    grid-column: 2;
-    grid-row: 1;
-}
-#output {
+#output-container {
     grid-column: 3;
     grid-row: 1;
 }
@@ -24,7 +20,7 @@
     grid-column: 2;
     grid-row: 2;
 }
-#social_sharer {
+#social-sharer-container {
     grid-column: 3;
     grid-row: 2;
 }
@@ -45,6 +41,8 @@
     font-size: 30px;
 }
 #build-button-container {
+    grid-column: 2;
+    grid-row: 1;
     display: flex;
     align-items: center;
 }
