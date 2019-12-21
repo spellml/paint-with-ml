@@ -17,7 +17,7 @@ import os
 opt = TrainOptions()
 opt.D_steps_per_G = 1
 opt.aspect_ratio = 1.0
-opt.batchSize = 1
+opt.batchSize = 8
 opt.beta1 = 0.0                           
 opt.beta2 = 0.9
 opt.cache_filelist_read = False                         
