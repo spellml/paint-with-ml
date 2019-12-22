@@ -3,6 +3,11 @@
 # This is the ADE20K pretrain model. This is meant to be trained on a machine with
 # 8 GPUs onboard. This model is a test version of the model which only trains for
 # a single epoch to verify that this model definition is, indeed, good.
+#
+# VAE is disabled for this run. Including it in the model would cause style transfer
+# to/from just the ADE20K corpus AFAIK, as previous experiments with training
+# this model from scratch demonstrated that the size of the Bob Ross corpus is not
+# sufficient for the style transfer elements to really kick in.
 
 import sys; sys.path.append('../lib/SPADE-master/')
 from options.train_options import TrainOptions
@@ -26,14 +31,13 @@ opt.checkpoints_dir = '/spell/checkpoints/'
 opt.contain_dontcare_label = True                          
 opt.continue_train = False
 opt.crop_size = 256                           
-opt.dataroot = '/spell/ade20k_c/ADEChallengeData2016/'  # data mount point
+opt.dataroot = '/spell/adek20k'  # data mount point
 opt.dataset_mode = "ade20k"
 opt.debug = False                         
 opt.display_freq = 100                           
 opt.display_winsize = 256                           
 opt.fff = 1  # junk value for the argparse                            
 opt.gan_mode = 'hinge'                         
-# opt.gpu_ids = []                             
 opt.init_type = 'xavier'                        
 opt.init_variance = 0.02                          
 opt.isTrain = True
@@ -77,9 +81,9 @@ opt.print_freq = 100
 opt.save_epoch_freq = 10                            
 opt.save_latest_freq = 5000                          
 opt.serial_batches = False                         
-opt.tf_log = False
-opt.use_vae = True
-opt.which_epoch = 'latest'                        
+opt.tf_log = True
+opt.use_vae = False
+opt.which_epoch = 'latest'
 opt.z_dim = 256
 opt.gpu_ids=[0,1,2,3,4,5,6,7]
 opt.results_dir='../data/SPADE_from_scratch_results/'
