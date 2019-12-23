@@ -81,6 +81,11 @@ opt.z_dim = 256
 opt.gpu_ids=[0]
 opt.results_dir='../data/SPADE_from_scratch_results/'
 opt.semantic_nc = 151
+opt.label_nc = 150
+opt.label_dir = '/spell/bob_ross_segmented/labels/'
+opt.image_dir = '/spell/bob_ross_segmented/images/'
+opt.instance_dir = ''
+
 
 model = Pix2PixModel(opt)
 model.train()
