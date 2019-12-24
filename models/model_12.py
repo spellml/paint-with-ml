@@ -108,7 +108,7 @@ def freeze_layers(model, n):
             param.requires_grad = True
 
     # Freeze all non-generator weights.
-    for chunk in list(model.children[1:]):
+    for chunk in list(model.children()[1:]):
         for param in chunk.parameters():
             param.requires_grad = False
 
