@@ -113,11 +113,11 @@ def freeze_layers(model, n):
             param.requires_grad = False
 
 def train_one_set(n_layers_frozen, opt):
+    # create trainer for our model and freeze necessary model layers
     opt.niter = opt.niter + 10  # 10 more iterations of training
-    opt.lr = 0.00002  # 1/10th of the original lr
-    
-    p2pt = Pix2PixModel(opt)
-    model = next(p2pt.pix2pix_model.children())
+    opt.lr = 0.00002  # 1/10th of the original lr    
+    trainer = Pix2PixTrainer(opt)
+    model = next(trainer.pix2pix_model.children())
     freeze_layers(model, n_layers_frozen)
     
     # Proceed with training.
@@ -125,8 +125,7 @@ def train_one_set(n_layers_frozen, opt):
     # load the dataset
     dataloader = data.create_dataloader(opt)
 
-    # create trainer for our model
-    trainer = Pix2PixTrainer(opt)
+    # trainer = Pix2PixTrainer(opt)
 
     # create tool for counting iterations
     iter_counter = IterationCounter(opt, len(dataloader))
