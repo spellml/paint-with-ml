@@ -1,4 +1,4 @@
-import sys; sys.path.append('../models/SPADE-master/')
+import sys; sys.path.append('../lib/SPADE-master/')
 from models.pix2pix_model import Pix2PixModel
 from options.test_options import TestOptions
 from torch import nn
