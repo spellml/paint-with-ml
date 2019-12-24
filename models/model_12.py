@@ -1,6 +1,7 @@
 # TODO: this docstring
 # 
-# This is the Bob Ross model trained on the ADE20K pretrain output.
+# This is the Bob Ross model trained on the ADE20K pretrain output. It must be trained on
+# a V100x2 platform because attempting it on a single V100 raises an OOM error.
 
 import sys; sys.path.append('../lib/SPADE-master/')
 from options.train_options import TrainOptions
@@ -86,14 +87,41 @@ opt.label_dir = '/spell/bob_ross_segmented/labels/'
 opt.image_dir = '/spell/bob_ross_segmented/images/'
 opt.instance_dir = ''
 
-
 model = Pix2PixModel(opt)
 model.train()
 
-def test_train():
-    # print options to help debugging
-    # print(' '.join(sys.argv))
+def freeze_layers(model, n):
+    # Freeze all but the output layer of the generator, as well as all but n
+    # SPADE blocks.
+    g = next(model.children())
+    g_c = list(g.children())
+    for gl in [g_c[0], g_c[-1], g_c[-2]]:
+        for param in gl.parameters():
+            param.requires_grad = False
+    for blk in g_c[1:-2 - n]:
+        for param in blk.parameters():
+            param.requires_grad = False
 
+    # Unfreeze the other SPADE blocks (in case they were previously frozen)
+    for blk in g_c[-2 - n:-2]:
+        for param in blk.parameters():
+            param.requires_grad = True
+
+    # Freeze all non-generator weights.
+    for chunk in list(model.children[1:]):
+        for param in chunk.parameters():
+            param.requires_grad = False
+
+def train_one_set(n_layers_frozen, opt):
+    opt.niter = opt.niter + 10  # 10 more iterations of training
+    opt.lr = 0.00002  # 1/10th of the original lr
+    
+    p2pt = Pix2PixModel(opt)
+    model = next(p2pt.pix2pix_model.children())
+    freeze_layers(model, n_layers_frozen)
+    
+    # Proceed with training.
+    
     # load the dataset
     dataloader = data.create_dataloader(opt)
 
@@ -148,6 +176,5 @@ def test_train():
             trainer.save('latest')
             trainer.save(epoch)
 
-    print('Training was successfully finished.')
-
-test_train()
+train_one_set(1, opt)
+train_one_set(2, opt)
