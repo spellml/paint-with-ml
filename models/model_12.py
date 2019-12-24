@@ -40,7 +40,7 @@ opt.lambda_feat = 10.0
 opt.lambda_kld = 0.05                          
 opt.lambda_vgg = 10.0                          
 opt.load_from_opt_file = False                         
-opt.load_size = 286  # should this be 256?
+opt.load_size = 256
 opt.lr = 0.0002                        
 opt.max_dataset_size = 9223372036854775807           
 opt.model = 'pix2pix'                       
@@ -103,12 +103,20 @@ def freeze_layers(model, n):
             param.requires_grad = False
 
     # Unfreeze the other SPADE blocks (in case they were previously frozen)
-    for blk in g_c[-2 - n:-2]:
-        for param in blk.parameters():
-            param.requires_grad = True
+    # for blk in g_c[-2 - n:-2]:
+    #     for param in blk.parameters():
+    #         param.requires_grad = True
 
-    # Freeze all non-generator weights.
-    for chunk in list(model.children())[1:]:
+    # Freeze all but the output layer and final convolutional layer of the discriminator.
+    d = list(model.children())[1]
+    for cnn in d.children():  # discriminator is multiscale, using two parallel CNNs
+        blks = list(cnn.children())
+        for blk in blks[-2:]:
+            for param in blk.parameters():
+                param.requires_grad = False
+
+    # Freeze all other non-generator non-discriminator weights (these are loss functions).
+    for chunk in list(model.children())[2:]:
         for param in chunk.parameters():
             param.requires_grad = False
 
