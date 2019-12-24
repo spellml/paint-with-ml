@@ -65,5 +65,7 @@ class ServingModel(nn.Module):
 # Trace and save
 module_instance = ServingModel()
 test_input = torch.tensor(np.ones((1,1,512,512)))
+print(test_input)
 traced_module = torch.jit.trace(module_instance, test_input)
 traced_module.save("model.pt")
+import os; print(os.listdir("./"))
