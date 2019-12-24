@@ -1,7 +1,8 @@
 # TODO: this docstring
 # 
-# This is the Bob Ross model trained on the ADE20K pretrain output. It must be trained on
-# a V100x2 platform because attempting it on a single V100 raises an OOM error.
+# This is the Bob Ross model trained on the ADE20K pretrain output. No iterative freezing
+# and unfreezing is performed; instead, training is performed for 50 epochs with a fixed
+# training rate which is 1/10th of the default. Compare with model_12.py.
 
 import sys; sys.path.append('../lib/SPADE-master/')
 from options.train_options import TrainOptions
@@ -90,50 +91,18 @@ opt.instance_dir = ''
 model = Pix2PixModel(opt)
 model.train()
 
-def freeze_layers(model, n):
-    # Freeze all but the output layer of the generator, as well as all but n
-    # SPADE blocks.
-    g = next(model.children())
-    g_c = list(g.children())
-    for gl in [g_c[0], g_c[-1], g_c[-2]]:
-        for param in gl.parameters():
-            param.requires_grad = False
-    for blk in g_c[1:-2 - n]:
-        for param in blk.parameters():
-            param.requires_grad = False
-
-    # Unfreeze the other SPADE blocks (in case they were previously frozen)
-    # for blk in g_c[-2 - n:-2]:
-    #     for param in blk.parameters():
-    #         param.requires_grad = True
-
-    # Freeze all but the output layer and final convolutional layer of the discriminator.
-    d = list(model.children())[1]
-    for cnn in d.children():  # discriminator is multiscale, using two parallel CNNs
-        blks = list(cnn.children())
-        for blk in blks[-2:]:
-            for param in blk.parameters():
-                param.requires_grad = False
-
-    # Freeze all other non-generator non-discriminator weights (these are loss functions).
-    for chunk in list(model.children())[2:]:
-        for param in chunk.parameters():
-            param.requires_grad = False
-
-def train_one_set(n_layers_frozen, opt):
+def train():
     # create trainer for our model and freeze necessary model layers
-    opt.niter = opt.niter + 20  # 20 more iterations of training (5000 image passes) per set
+    opt.niter = opt.niter + 20  # 20 more iterations of training
     opt.lr = 0.00002  # 1/10th of the original lr    
     trainer = Pix2PixTrainer(opt)
-    model = next(trainer.pix2pix_model.children())
-    freeze_layers(model, n_layers_frozen)
     
     # Proceed with training.
     
     # load the dataset
     dataloader = data.create_dataloader(opt)
 
-    # trainer = Pix2PixTrainer(opt)
+    trainer = Pix2PixTrainer(opt)
 
     # create tool for counting iterations
     iter_counter = IterationCounter(opt, len(dataloader))
@@ -183,5 +152,4 @@ def train_one_set(n_layers_frozen, opt):
             trainer.save('latest')
             trainer.save(epoch)
 
-train_one_set(1, opt)
-train_one_set(2, opt)
+train()
