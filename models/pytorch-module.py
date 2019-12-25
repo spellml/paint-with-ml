@@ -10,7 +10,8 @@ opt.aspect_ratio=1.0
 opt.batchSize=1
 opt.cache_filelist_read=False
 opt.cache_filelist_write=False
-opt.checkpoints_dir='/spell/checkpoints/'
+# opt.checkpoints_dir='/spell/checkpoints/'
+opt.checkpoints_dir='/Users/alex/Desktop/checkpoints/'
 opt.contain_dontcare_label=True
 opt.crop_size=256
 opt.dataroot=''
@@ -26,7 +27,7 @@ opt.load_size=256
 opt.max_dataset_size=9223372036854775807
 opt.model='pix2pix'
 opt.nThreads=0
-opt.name='fine_tuned_unfrozen'
+opt.name='bob_ross_x_ade20k_outdoors'
 opt.nef=16
 opt.netG='spade'
 opt.ngf=64
@@ -56,16 +57,14 @@ class ServingModel(nn.Module):
 
     def forward(self, segmap):
         return self.model({
-            'label': torch.tensor(segmap[None, None]).float(),
+            'label': segmap.float(),
             'instance': torch.tensor([0]),
-            'image': torch.tensor(np.zeros((1, 3, 512, 512))).float(),
+            'image': torch.tensor([0]).float(),
             'path': ['~/']
         }, mode='inference')
 
 # Trace and save
 module_instance = ServingModel()
 test_input = torch.tensor(np.ones((1,1,512,512)))
-print(test_input)
 traced_module = torch.jit.trace(module_instance, test_input)
 traced_module.save("model.pt")
-import os; print(os.listdir("./"))

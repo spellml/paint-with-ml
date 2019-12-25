@@ -7,3 +7,5 @@ lib/SPADE-master/docs/
 __pycache__/
 node_modules/
 dist/
+temp
+*.pt
