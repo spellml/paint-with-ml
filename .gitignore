@@ -7,5 +7,7 @@ lib/SPADE-master/docs/
 __pycache__/
 node_modules/
 dist/
+checkpoints/
 temp
 *.pt
+*.egg-info/

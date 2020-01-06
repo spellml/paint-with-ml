@@ -4,6 +4,7 @@ import Canvas from './canvas';
 import Toolbox from './toolbox';
 import BuildButton from './build_button';
 import OutputPicture from './output_picture';
+import rp from 'request-promise-native';
 
 
 class App extends Component {
@@ -74,6 +75,7 @@ class App extends Component {
         this.onToolboxToolButtonClick = this.onToolboxToolButtonClick.bind(this);
         this.onBrushSizeSliderChange = this.onBrushSizeSliderChange.bind(this);
         this.updateSegmentationMap = this.updateSegmentationMap.bind(this);
+        this.onBuildButtonClick = this.onBuildButtonClick.bind(this);
     }
 
     onToolboxLabelButtonClick(n) {
@@ -95,7 +97,21 @@ class App extends Component {
 
     onBuildButtonClick() {
         // TODO: implement this logic.
-        console.log('Clicked!');
+        console.log(this.canvasRef);
+        let opts = {
+            method: 'POST',
+            uri: '/predict',
+            body: this.canvasRef.toDataURL()
+        }
+        rp(opts)
+            .then(parsedBody => {
+                console.log('Success!')
+                console.log(parsedBody);
+            })
+            .catch(err => {
+                console.log('Fail whale!')
+                throw err;
+            });
     }
 
     onBrushSizeSliderChange(v) {

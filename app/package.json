@@ -4,7 +4,7 @@
   "description": "Paint your own Bob Ross.",
   "main": "index.js",
   "scripts": {
-    "build": "npx browserify -t [babelify --presets [ @babel/preset-env @babel/preset-react ] ] index.js -o dist/index.js",
+    "build": "npx browserify -t [babelify --presets [ @babel/preset-env @babel/preset-react ] ] static/index.js -o static/dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -25,6 +25,8 @@
     "browserify": "^16.5.0",
     "core-js": "^3.5.0",
     "react": "^16.12.0",
-    "react-dom": "^16.12.0"
+    "react-dom": "^16.12.0",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.8"
   }
 }
