@@ -1,7 +1,6 @@
-# TODO: this docstring
-# 
 # This is the ADE20K pretrain model. This is meant to be trained on a machine with
-# 8 GPUs onboard. This file is the full, 50-epoch model trainer.
+# 8 GPUs onboard. This file is the full, 50-epoch model trainer. Warning: this model costs
+# ~350$ to train once!
 
 import sys; sys.path.append('../lib/SPADE-master/')
 from options.train_options import TrainOptions

@@ -1,5 +1,3 @@
-# TODO: this docstring
-
 # This is a dummy model that trains with TensorBoard enabled just to make sure I see
 # where the files land.
 

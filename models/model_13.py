@@ -1,5 +1,3 @@
-# TODO: this docstring
-# 
 # This is the Bob Ross model trained on the ADE20K pretrain output. No iterative freezing
 # and unfreezing is performed; instead, training is performed for 50 epochs with a fixed
 # training rate which is 1/10th of the default. Compare with model_12.py.

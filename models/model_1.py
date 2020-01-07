@@ -1,5 +1,3 @@
-# TODO: this docstring
-
 # Changes relative to model_0.py:
 # * Decreased load_size from 286 to 256, matching crop_size. I do not think edge cropping is
 #   useful with this dataset.

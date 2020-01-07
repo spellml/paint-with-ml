@@ -1,5 +1,3 @@
-# TODO: this docstring
-
 # Changes relative to model_2.py:
 # * lambda_kld increased 10x (increases VAE fit training contribution)
 

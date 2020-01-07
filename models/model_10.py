@@ -1,5 +1,3 @@
-# TODO: this docstring
-# 
 # This is the ADE20K pretrain model. This is meant to be trained on a machine with
 # 8 GPUs onboard. This model is a test version of the model which only trains for
 # a single epoch to verify that this model definition is, indeed, good.

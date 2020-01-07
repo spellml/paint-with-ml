@@ -1,5 +1,3 @@
-# TODO: this docstring
-
 # Changes relative to model_1.py:
 # * Increased output size to 512x512.
 

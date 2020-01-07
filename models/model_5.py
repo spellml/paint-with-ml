@@ -1,5 +1,3 @@
-# TODO: this docstring
-
 # This model trains for 100 epochs instead of the standard 50; and it uses the TensorBoard
 # integration. KLD is still set to 10x the default.
 

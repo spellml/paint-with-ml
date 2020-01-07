@@ -3,10 +3,13 @@ Module providing the ModelLoader wrapper class, which handles model instantiatio
 """
 import torch
 import numpy as np
+from PIL import Image
 
 from pathlib import Path
 import os
 import yaml
+import io
+import base64
 
 import spell
 import spell.client
@@ -107,14 +110,71 @@ class ModelLoader:
             src = f'checkpoints/bob_ross_x_ade20k_outdoors/{epoch_id}_net_G.pth'
         run.cp(src, f'checkpoints/{run_id}/')
 
-    def get_prediction(self, segmap):
+
+    def png_data_uri_to_batch_tensor(self, data_uri):
+        color_key = {
+            (241, 159, 240, 255): 3,
+            (154, 153,  64, 255): 5,
+            (255, 253,  57, 255): 10,
+            (50, 0, 50, 255): 14,
+            (249,  40,  55, 255): 17,
+            (50, 0, 0, 255): 18,
+            (45, 255, 254, 255): 22,
+            (62, 110, 122, 255): 27,
+            (0, 50, 50, 255): 61
+        }
+        # color_key = {
+        #     (241, 159, 240, 255): 0,
+        #     (154, 153,  64, 255): 1,
+        #     (255, 253,  57, 255): 2,
+        #     (50, 0, 50, 255): 3,
+        #     (249,  40,  55, 255): 4,
+        #     (50, 0, 0, 255): 5,
+        #     (45, 255, 254, 255): 6,
+        #     (62, 110, 122, 255): 7,
+        #     (0, 50, 50, 255): 8
+        # }
+
+        # base64 encoded PNG -> PIL image -> array
+        data_uri = data_uri[data_uri.find(',') + 1:]
+        segmap_c = np.array(
+            Image.open(io.BytesIO(base64.b64decode(data_uri)))
+        )
+        segmap = np.zeros((512, 512))
+        for x in range(512):
+            for y in range(512):
+                c = tuple(segmap_c[x][y])
+                segmap[x][y] = color_key[c]
+        del segmap_c
+        tensor = torch.tensor(segmap[None, None]).float()
+        return tensor
+
+
+    def batch_tensor_to_png_data_uri(self, tensor):
+        # [-1, 1] batch tensor -> [0, 255] image array -> PIL image
+        result = Image.fromarray(
+            ((tensor.squeeze().numpy() + 1) / 2 * 255).transpose(1, 2, 0).astype('uint8')
+        )
+
+        # Package into a base64 PNG and return
+        out = io.BytesIO()
+        result.save(out, format='PNG')
+        out = 'data:image/png;base64,'.encode('utf-8') + base64.b64encode(out.getvalue())
+        return out
+
+
+    def get_prediction(self, data_uri):
+        label = self.png_data_uri_to_batch_tensor(data_uri)
+
         result = self.model({
-            'label': torch.tensor(segmap[None, None]).float(),
+            'label': label,
             'instance': torch.tensor([0]),
             'image': torch.tensor(np.zeros((1, 3, 512, 512))).float(),
             'path': ['~/']
         }, mode='inference')
-        return result
+
+        out = self.batch_tensor_to_png_data_uri(result)
+        return out
 
 
 __all__ = ['ModelLoader']

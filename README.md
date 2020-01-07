@@ -14,21 +14,26 @@ Try it out yourself at $LINK. Or, read the article describing how it was made: "
 
 ```
 ├── LICENSE
-├── README.md          <- You're reading it!
-├── lib                <- Vendored model code (Python).
-│   └── SPADE-master   <- Vendored copy of NVlabs/SPADE.* **
-├── models             <- Model assets
-│   └── model_0.py     <- The build script for the first model trained.
-│   └── ...
-│   └── model_N.py     <- The build script for the last model trained.
-│   └── README.md      <- Reference to the models builds.
-├── notebooks          <- Jupyter notebooks discussing the model build process. Start here!
-├── requirements.txt   <- Python project environment requirements, installable with pip.
-├── app                <- The React web application.
-│   └── README.md      <- Reference to the web app design/assets.
-├── package.json       <- Web app JS requirements, installable with npm.
-├── Dockerfile         <- Dockerfile bundling the web application.
-├── DEPLOY.md          <- Instructions on deploying this application yourself.
+├── README.md             <- You're reading it!
+├── lib/                  <- Vendored model code (Python).
+│   ├── SPADE-master/     <- Vendored copy of NVlabs/SPADE.* **
+│   └── module_loader/    <- Simple model server Python module used for model serving.
+├── models                <- Model assets
+│   ├── model_0.py        <- The build script for the first model trained.
+│   ├── ...
+│   ├── model_N.py        <- The build script for the last model trained.
+│   └── README.md         <- Reference to the models builds.
+├── notebooks             <- Jupyter notebooks discussing the model build process.
+├── requirements.txt      <- Project environment requirements, installable with pip.
+├── app/                  <- User-facing demo React web app.
+│   ├── README.md         <- Reference on how to build and serve the web app.
+│   ├── index.html
+│   ├── components/       <- Web app React components.
+│   ├── models/           <- Loadable model configs (see module_loader).
+│   ├── static/           <- Web app static resources (e.g. CSS, build JS).
+│   ├── requirements.txt  <- Web app Python requirements, installable with pip.
+|   └── package.json      <- Web app JS requirements, installable with npm.
+├── Dockerfile            <- Dockerfile bundling the web application.
 └── .gitignore
 
 *  Also contains a copy of vacancy/Synchronized-BatchNorm-PyTorch, a NVlabs/SPADE requirement

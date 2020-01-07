@@ -1,5 +1,3 @@
-# TODO: this docstring
-
 # This is model 6 with VAE turned off.
 
 import sys; sys.path.append('../lib/SPADE-master/')

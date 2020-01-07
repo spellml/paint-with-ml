@@ -1,4 +1,4 @@
-# TODO: this docstring
+# This is a GuaGAN training run with all-default settings trained on the Bob Ross image corpus.
 
 import sys; sys.path.append('../lib/SPADE-master/')
 from options.train_options import TrainOptions

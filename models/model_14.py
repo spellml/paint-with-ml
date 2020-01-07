@@ -1,5 +1,3 @@
-# TODO: this docstring
-# 
 # This is model 12 with the following adjustments: reduced epoch save count to 1; reduced epoch
 # total count to 8 (4 per training set); reduced LR for second training cycle to 1/20th of the
 # standard LR. This is a much shorter-cycle and weaker transfer designed to allow me to evaluate

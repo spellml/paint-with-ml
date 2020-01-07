@@ -1,5 +1,3 @@
-# TODO: this docstring
-
 # This model trains for 100 epochs instead of the standard 50, and it uses the TensorBoard
 # integration. KLD is reset back to its original value of 0.05; compare to model_5.py, where
 # KLD is set 10x higher, to 0.5.
