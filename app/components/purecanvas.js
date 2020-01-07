@@ -11,13 +11,14 @@ class PureCanvas extends Component {
         return (
             <canvas
                 // See Canvas.render for a detailed explanation of what this line of code does.
-                ref={ node => node ? this.props.contextRef(node.getContext('2d')) : null }
+                ref={ node => node ? this.props.contextRef(node) : null }
                 width="512"
                 height="512"
                 onClick={this.props.onClick}
                 onMouseDown={this.props.onMouseDown}
                 onMouseUp={this.props.onMouseUp}
                 onMouseMove={this.props.onMouseMove}
+                onMouseOut={this.props.onMouseOut}
             />
         );
     }

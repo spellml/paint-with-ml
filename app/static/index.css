@@ -46,3 +46,6 @@
     display: flex;
     align-items: center;
 }
+.app.waiting {
+    cursor: wait;
+}

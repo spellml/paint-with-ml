@@ -64,7 +64,30 @@ class App extends Component {
             'tool': 'pen',
             'tool_radius': 10,
             'tool_value': 2,
-            'waiting': false
+            // default output_picture is 512x512 empty
+            'output_picture': `
+                data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABHNCSVQICAgIf
+                AhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoA
+                AAQPSURBVHic7cExAQAAAMKg9U9tB2+gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADgNwLwAAHZZ/GIAAAAAElFTkS
+                uQmCC
+            `,
+            'waiting': false  // TODO
         }
 
         // These event handlers are passed down to and actually called within the child components,
@@ -96,20 +119,25 @@ class App extends Component {
     }
 
     onBuildButtonClick() {
-        // TODO: implement this logic.
-        console.log(this.canvasRef);
+        // model imputations are expensive, so only allow one at a time
+        if (this.state.waiting) { return; }
+
+        this.setState(Object.assign({}, this.state, {'waiting': true}));
         let opts = {
             method: 'POST',
-            uri: '/predict',
-            body: this.canvasRef.toDataURL()
+            headers: {'Content-Type': 'text/plain'},
+            uri: `${window.location.href}predict`,
+            body: this.canvasRef.canvas.toDataURL()
         }
         rp(opts)
-            .then(parsedBody => {
-                console.log('Success!')
-                console.log(parsedBody);
+            .then(png => {
+                this.setState(
+                    Object.assign({}, this.state, {'output_picture': png, 'waiting': false})
+                );
             })
             .catch(err => {
-                console.log('Fail whale!')
+                // TODO: do something when an error occurs
+                this.setState(Object.assign({}, this.state, {'waiting': false}));
                 throw err;
             });
     }
@@ -147,7 +175,8 @@ class App extends Component {
     }
 
     render() {
-        return <div id='frame'>
+        let classname = (this.state.waiting) ? 'app waiting' : 'app';
+        return <div id='frame' className={classname}>
             <div id='canvas-container'>
                 <Canvas
                     id='canvas'
@@ -159,6 +188,7 @@ class App extends Component {
                     segmap={this.state.segmap}
                     updateSegmentationMap={this.updateSegmentationMap}
                     color_key={this.color_key}
+                    waiting={this.state.waiting}
                     ref={(canvas) => this.canvasRef = canvas}
                 />
             </div>
@@ -168,7 +198,7 @@ class App extends Component {
                 />
             </div>
             <div id='output-container'>
-                <OutputPicture/>
+                <OutputPicture output_picture={this.state.output_picture}/>
             </div>
             <div id='toolbox-container'>
                 <Toolbox
@@ -176,11 +206,12 @@ class App extends Component {
                     onLabelButtonClick={this.onToolboxLabelButtonClick}
                     onToolButtonClick={this.onToolboxToolButtonClick}
                     tool_radius={this.state.tool_radius}
+                    waiting={this.state.waiting}
                     onBrushSizeSliderChange={this.onBrushSizeSliderChange}
                 />
             </div>
             <div id='spacer'/>
-            <div id='socal-sharer-container'>social_shrarer</div>
+            <div id='socal-sharer-container'></div>
         </div>
     }
 

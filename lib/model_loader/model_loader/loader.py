@@ -6,6 +6,7 @@ import numpy as np
 
 from pathlib import Path
 import os
+import yaml
 
 import spell
 import spell.client
@@ -16,7 +17,7 @@ class ModelLoader:
     Performs a network request to download and initialize a model locally.
     """
 
-    def __init__(self, run_id, epoch_id='latest', opts={}):
+    def __init__(self, run_id, epoch_id='latest'):
         # First we must load the model code artifact.
         #
         # The SPADE model code is not pip-installable because it lacks a setup.py file, so
@@ -39,6 +40,12 @@ class ModelLoader:
             raise OSError(
                 f"MODEL_CODE_PATH is unset. Set this to the directory containing SPADE."
             )
+        try:
+            path = os.environ['MODEL_CONFIG_PATH']
+        except KeyError:
+            raise OSError(
+                f"MODEL_CONFIG_PATH is unset. Set this to the directory with model YAML files."
+            )
 
         from models.pix2pix_model import Pix2PixModel
         from options.test_options import TestOptions
@@ -47,68 +54,36 @@ class ModelLoader:
         self.load_model_resources(run_id, epoch_id)
 
         # Instantiate the model object using the GuaGAN config system.
-        # TODO: how many of these opts can safely be left unset?
         opt = TestOptions()
-        opt.aspect_ratio=1.0
-        opt.batchSize=1
-        opt.cache_filelist_read=False
-        opt.cache_filelist_write=False
-        opt.checkpoints_dir='checkpoints/'
-        opt.contain_dontcare_label=True
-        opt.crop_size=256
-        opt.dataroot=''
-        opt.dataset_mode='custom'
-        opt.display_winsize=512
-        opt.gpu_ids=[]
-        opt.how_many=float('inf')
-        opt.init_type='xavier'
-        opt.init_variance=0.02
-        opt.isTrain=False
-        opt.load_from_opt_file=False
-        opt.load_size=256
-        opt.max_dataset_size=9223372036854775807
-        opt.model='pix2pix'
-        opt.nThreads=0
-        opt.nef=16
-        opt.netG='spade'
-        opt.ngf=64
-        opt.no_flip=True
-        opt.no_instance=True
-        opt.no_pairing_check=False
-        opt.norm_D='spectralinstance'
-        opt.norm_E='spectralinstance'
-        opt.norm_G='spectralspadesyncbatch3x3'
-        opt.num_upsampling_layers='normal'
-        opt.output_nc=3
-        opt.phase='test'
-        opt.preprocess_mode='resize_and_crop'
-        opt.results_dir=''
-        opt.label_nc=150
-        opt.semantic_nc=151
-        opt.serial_batches=True
-        opt.use_vae=False
-        opt.z_dim=256
-        opt.name='GuaGAN_ADE20K_Landscapes'
-        opt.which_epoch=epoch_id
+        with open(f'{os.environ["MODEL_CONFIG_PATH"].rstrip("/")}/{run_id}.yaml', 'r') as fp:
+            saved_opts = yaml.safe_load(fp)
+            for _opt in saved_opts:
+                setattr(opt, _opt, saved_opts[_opt])
 
-        for o in opts:
-            opt.setattr(o, opts[o])
+        # If the environment has GPUs available and visible, use them.
+        if 'CUDA_VISIBLE_DEVICES' in os.environ:
+            gpus = os.environ['CUDA_VISIBLE_DEVICES']
+            if ',' in gpus:
+                gpus = gpus.split(',')
+            else:
+                gpus = int(gpus)
+        else:
+            gpus = []
+        os.gpu_ids = gpus
 
         model = Pix2PixModel(opt)
         model.eval()
+        self.model = model
 
         # No longer need SPADE-master on PYTHONPATH.
-        # TODO: is this true?
         sys.path.pop()
 
-        # Save the model as an object property.
-        self.model = model
 
     def load_model_resources(self, run_id, epoch_id='latest'):
         """
         Helper function. Loads the model checkpoints file.
         """
-        checkpoint_file = Path(f'checkpoints/GuaGAN_ADE20K_Landscapes/{epoch_id}_net_G.pth')
+        checkpoint_file = Path(f'checkpoints/{run_id}/{epoch_id}_net_G.pth')
         if checkpoint_file.exists():
             print(f'Reusing existing checkpoints file {checkpoint_file.as_posix()}.')
             return
@@ -120,12 +95,17 @@ class ModelLoader:
                 'Could not instantiate SpellClient from the environment, did you forget '
                 'to specify SPELL_TOKEN and/or SPELL_OWNER environment variables?'
             )
-        
+
+        # The checkpoints path is run-dependent, but there is no arbitrary metadata assigned to
+        # a run. For now we work around this issue manually. But this is awkward!
         run = client.runs.get(run_id)
-        run.cp(
-            f'checkpoints/ade20k_pretrained/{epoch_id}_net_G.pth', 
-            f'checkpoints/GuaGAN_ADE20K_Landscapes/'
-        )
+        if run_id == 62:
+            src = f'checkpoints/bob_ross/{epoch_id}_net_G.pth'
+        if run_id == 79:
+            src = f'checkpoints/ade20k_pretrained/{epoch_id}_net_G.pth'
+        elif run_id == 102:
+            src = f'checkpoints/bob_ross_x_ade20k_outdoors/{epoch_id}_net_G.pth'
+        run.cp(src, f'checkpoints/{run_id}/')
 
     def get_prediction(self, segmap):
         result = self.model({

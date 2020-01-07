@@ -12,10 +12,16 @@ class Canvas extends Component {
         this.onMouseDown = this.onMouseDown.bind(this);
         this.onMouseUp = this.onMouseUp.bind(this);
         this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseOut = this.onMouseOut.bind(this);
     }
 
-    saveContext(ctx) {
-        this.ctx = ctx;
+    saveContext(canvas) {
+        // This method is called a define time to pull a reference to the underlying canvas
+        // object up React's object stack (via 'ref'). We need both the canvas DOM node and
+        // the canvas context object because while most canvas objects hang off of the context,
+        // the toDataURI() method, which we need, hangs off of the canvas DOM node itself.
+        this.canvas = canvas;
+        this.ctx = this.canvas.getContext('2d');
         this.width = this.ctx.canvas.width;
         this.height = this.ctx.canvas.height;
     }
@@ -97,14 +103,16 @@ class Canvas extends Component {
             this.props.updateSegmentationMap(segmap);
         }
         // no need to handle 'reset', this is handled at the App level
-        // nn need to handle 'bucket', to conserve compute this is only performed on mouseup
+        // no need to handle 'bucket', this is only performed on mouseup
     }
 
-    onMouseDown() {
-        this.mouse_down = true;
-    }
-
+    onMouseDown() { this.mouse_down = true; }
+    onMouseMove(e) { if (this.mouse_down) { if (!this.props.waiting) this.paint(e); }}
+    onMouseOut() { this.mouse_down = false; }
+    onClick(e) { if (!this.props.waiting) this.paint(e); }
     onMouseUp(e) {
+        if (this.props.waiting) return;
+
         this.mouse_down = false;
         if (this.props.tool === 'bucket') {
             let x = e.pageX - e.target.offsetLeft;
@@ -112,16 +120,6 @@ class Canvas extends Component {
             let v = this.props.tool_value;
             this.props.updateSegmentationMap(this.bucketMatrix(x, y, v));
         }
-    }
-
-    onMouseMove(e) {
-        if (this.mouse_down) {
-            this.paint(e);
-        }
-    }
-
-    onClick(e) {
-        this.paint(e);
     }
 
     componentDidMount(){
@@ -159,6 +157,7 @@ class Canvas extends Component {
             onMouseDown={this.onMouseDown}
             onMouseUp={this.onMouseUp}
             onMouseMove={this.onMouseMove}
+            onMouseOut={this.onMouseOut}
         />;
     }
 }
