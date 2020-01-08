@@ -1,0 +1,7 @@
+app/__pycache__/
+app/checkpoints/
+app/node_modules/
+.vscode/
+temp/
+lib/SPADE-master/checkpoints/
+lib/SPADE-master/docs/

@@ -8,7 +8,7 @@ from ast import literal_eval
 
 from flask import Flask, make_response, send_file
 from flask import request
-app = Flask(__name__, static_folder='static')
+app = Flask('neural-painter', static_folder='static')
 
 from model_loader import ModelLoader
 model = ModelLoader(79)

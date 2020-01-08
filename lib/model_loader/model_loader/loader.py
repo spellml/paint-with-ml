@@ -54,7 +54,15 @@ class ModelLoader:
         from options.test_options import TestOptions
 
         # Use the Spell Python client to download model checkpoints from SpellFS.
+        #
+        # If you are not the original author or a member of the Spell dev team, and you don't 
+        # already have a copy of the model checkpoints on your local disk, running the following
+        # code will not do what you expect it to do. Use `load_model_resources_public` instead.
         self.load_model_resources(run_id, epoch_id)
+
+        # TODO: implement this. Requires the model checkpoints to be available as a public
+        # resource first.
+        # self.load_model_resources_public(run_id, epoch_id)
 
         # Instantiate the model object using the GuaGAN config system.
         opt = TestOptions()
@@ -84,7 +92,7 @@ class ModelLoader:
 
     def load_model_resources(self, run_id, epoch_id='latest'):
         """
-        Helper function. Loads the model checkpoints file.
+        Helper function. Loads the model checkpoints file from source on Spell.
         """
         checkpoint_file = Path(f'checkpoints/{run_id}/{epoch_id}_net_G.pth')
         if checkpoint_file.exists():
@@ -93,11 +101,9 @@ class ModelLoader:
 
         try:
             client = spell.client.from_environment()
-        except ClientException:
-            raise OSError(
-                'Could not instantiate SpellClient from the environment, did you forget '
-                'to specify SPELL_TOKEN and/or SPELL_OWNER environment variables?'
-            )
+        except ClientException as e:
+            print('Could not instantiate SpellClient from the environment.')
+            raise e
 
         # The checkpoints path is run-dependent, but there is no arbitrary metadata assigned to
         # a run. For now we work around this issue manually. But this is awkward!
@@ -109,6 +115,10 @@ class ModelLoader:
         elif run_id == 102:
             src = f'checkpoints/bob_ross_x_ade20k_outdoors/{epoch_id}_net_G.pth'
         run.cp(src, f'checkpoints/{run_id}/')
+
+
+    def load_model_resources_public(self, run_id, epoch_id='latest'):
+        raise NotImplementedError
 
 
     def png_data_uri_to_batch_tensor(self, data_uri):

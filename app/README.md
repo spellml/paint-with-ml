@@ -22,7 +22,7 @@ The application backend is a structured as a simple Python-Flask application. Mo
     ```
 
    ...replacing `path_to` with the path to this project on your local machine.
-6. `spell login`. Your account must have access to the model data assets on SpellFS. [TODO: can the assets be made public somehow?]
+6. Download a copy of the model checkpoints here (TODO: $LINK). Unzip this file to `checkpoints/79/latest_net_G.pth`, e.g. in a `checkpoints/` subdirectory.
 7. Export the Flask environment variables (you may set `FLASK_ENV=production` instead, if you are so inclined):
 
    ```bash
@@ -38,5 +38,5 @@ The application backend is a structured as a simple Python-Flask application. Mo
 
    For model serving on CPU, skip this step.
 
-9. Start the web service using `flask run`. It may take some time for the app to start the first time you run this command as `model_loader` will need to download the model checkpoints to local disk.
-10. Once the server is running, navigate to the linked-to web page and try out the app!
+9. Start the web service using `flask run --no-reload`. It may take some time for the app to start the first time you run this command as `model_loader` will need to download the model checkpoints to local disk.
+10. Once the server is running, navigate to the linked-to web page and try it out.
