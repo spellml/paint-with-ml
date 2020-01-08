@@ -7,5 +7,5 @@ numpy
 scikit-image
 # model serving requirements
 spell
-pillow==6.1
+pillow==6.2.0
 flask==1.1.1
