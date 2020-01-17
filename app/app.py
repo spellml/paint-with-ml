@@ -11,7 +11,8 @@ from flask import request
 app = Flask('neural-painter', static_folder='static')
 
 from model_loader import ModelLoader
-model = ModelLoader(79)
+# model = ModelLoader(79)
+model = ModelLoader(102)
 print('App ready!')
 
 
