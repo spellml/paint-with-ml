@@ -119,15 +119,17 @@ class App extends Component {
     }
 
     onBuildButtonClick() {
-        // model imputations are expensive, so only allow one at a time
+        // model computations are expensive, so only allow one at a time
         if (this.state.waiting) { return; }
 
+        // the /predict endpoint is a proxy service for the request
         this.setState(Object.assign({}, this.state, {'waiting': true}));
         let opts = {
             method: 'POST',
-            headers: {'Content-Type': 'text/plain'},
+            headers: {'Content-Type': 'application/json'},
             uri: `${window.location.href}predict`,
-            body: this.canvasRef.canvas.toDataURL()
+            json: true,
+            body: {'segmap': this.canvasRef.canvas.toDataURL()}
         }
         rp(opts)
             .then(png => {

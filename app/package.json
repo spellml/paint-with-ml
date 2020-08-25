@@ -18,15 +18,15 @@
   },
   "homepage": "https://github.com/ResidentMario/bob-ross-neural-painter#readme",
   "dependencies": {
-    "@babel/core": "^7.7.5",
-    "@babel/preset-env": "^7.7.6",
-    "@babel/preset-react": "^7.7.4",
+    "@babel/core": "^7.10.4",
+    "@babel/preset-env": "^7.10.4",
+    "@babel/preset-react": "^7.10.4",
     "babelify": "^10.0.0",
-    "browserify": "^16.5.0",
-    "core-js": "^3.5.0",
-    "react": "^16.12.0",
-    "react-dom": "^16.12.0",
-    "request": "^2.88.0",
+    "browserify": "^16.5.1",
+    "core-js": "^3.6.5",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "request": "^2.88.2",
     "request-promise-native": "^1.0.8"
   }
 }
