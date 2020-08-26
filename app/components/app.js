@@ -195,7 +195,9 @@ class App extends Component {
                         id='toolbox'
                         onLabelButtonClick={this.onToolboxLabelButtonClick}
                         onToolButtonClick={this.onToolboxToolButtonClick}
+                        activeTool={this.state.tool}
                         tool_radius={this.state.tool_radius}
+                        tool_value={this.state.tool_value}
                         waiting={this.state.waiting}
                         onBrushSizeSliderChange={this.onBrushSizeSliderChange}
                     />

@@ -14,17 +14,17 @@ class Toolbox extends Component {
                     <ToolboxToolButton
                             onClick={this.props.onToolButtonClick}
                             tool='pen'
-                            toolImage='🖌️'
+                            activeTool={this.props.activeTool}
                     />
                     <ToolboxToolButton
                             onClick={this.props.onToolButtonClick}
                             tool='eraser'
-                            toolImage='🚫'
+                            activeTool={this.props.activeTool}
                     />
                     <ToolboxToolButton
                             onClick={this.props.onToolButtonClick}
                             tool='bucket'
-                            toolImage='🧺'
+                            activeTool={this.props.activeTool}
                     />
                 </div>
                 <div id='brush-size-slider-container'>
@@ -36,59 +36,58 @@ class Toolbox extends Component {
                         onChange={this.props.onBrushSizeSliderChange}
                     />
                 </div>
+                <div className='toolbox-section-label'>Elements</div>
                 <div id='label-buttons-container'>
-                    <div className='toolbox-section-label'>Elements</div>
                     <ToolboxLabelButton
                         onClick={this.props.onLabelButtonClick}
                         classId={0}
-                        classImage='☁️'
+                        toolValue={this.props.tool_value}
                     />
                     <ToolboxLabelButton
                         onClick={this.props.onLabelButtonClick}
                         classId={1}
-                        classImage='🌳'
+                        toolValue={this.props.tool_value}
                     />
                     <ToolboxLabelButton
                         onClick={this.props.onLabelButtonClick}
                         classId={2}
-                        classImage='🌱'
+                        toolValue={this.props.tool_value}
                     />
                     <ToolboxLabelButton
                         onClick={this.props.onLabelButtonClick}
                         classId={3}
-                        classImage='🗿'
+                        toolValue={this.props.tool_value}
                     />
                     <ToolboxLabelButton
                         onClick={this.props.onLabelButtonClick}
                         classId={4}
-                        classImage='⛰️'
+                        toolValue={this.props.tool_value}
                     />
                     <ToolboxLabelButton
                         onClick={this.props.onLabelButtonClick}
                         classId={5}
-                        classImage='🌿'
+                        toolValue={this.props.tool_value}
                     />
                     <ToolboxLabelButton
                         onClick={this.props.onLabelButtonClick}
                         classId={6}
-                        classImage='💧'
+                        toolValue={this.props.tool_value}
                     />
                     <ToolboxLabelButton
                         onClick={this.props.onLabelButtonClick}
                         classId={7}
-                        classImage='🌊'
+                        toolValue={this.props.tool_value}
                     />
                     <ToolboxLabelButton
                         onClick={this.props.onLabelButtonClick}
                         classId={8}
-                        classImage='💦'
+                        toolValue={this.props.tool_value}
                     />
                 </div>
                 <div id='reset-button-container'>
                     <ToolboxToolButton
                                 onClick={this.props.onToolButtonClick}
                                 tool='reset'
-                                toolImage='🚽'
                         />
                 </div>
                 <div id='logo'>

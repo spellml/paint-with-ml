@@ -4,7 +4,7 @@ import { Component } from 'react';
 
 class BrushSizeSlider extends Component {
     render() {
-        return <div>            
+        return <div id="slider-container">
             <input type="range" id="start"
                 name="brush_size" min="8" max="100" step="2"
                 defaultValue={this.props.tool_radius * 2}
