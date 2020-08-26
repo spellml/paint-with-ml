@@ -7,7 +7,7 @@ class BrushSizeSlider extends Component {
         return <div id="slider-container">
             <input type="range" id="start"
                 name="brush_size" min="8" max="100" step="2"
-                defaultValue={this.props.tool_radius * 2}
+                defaultValue={this.props.toolRadius * 2}
                 onChange={e => this.props.onChange(e.target.value)}
             />
         </div>

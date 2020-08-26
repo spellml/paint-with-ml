@@ -30,7 +30,7 @@ class Canvas extends Component {
         let segmap = this.props.segmap.slice();
         let [xmin, xmax] = [Math.max(0, cx - r), Math.min(512, cx + r)];
         let [ymin, ymax] = [Math.max(0, cy - r), Math.min(512, cy + r)];
-        let color = this.props.color_key[v];
+        let color = this.props.colorKey[v];
         const dist = (cx, x, cy, y) => {
             return (Math.abs(cx - x)**2 + Math.abs(cy - y)**2)**(1/2)
         }
@@ -49,7 +49,7 @@ class Canvas extends Component {
     }
 
     bucketMatrix(cx, cy, v) {
-        const new_color = this.props.color_key[v];
+        const newColor = this.props.colorKey[v];
         const getPixel = (x, y, segmap) => {
             let pos = (y * 512 * 4) + (x * 4);
             return segmap.slice(pos, pos + 4);                        
@@ -57,16 +57,16 @@ class Canvas extends Component {
         const paintPixel = (x, y, segmap) => {
             let pos = (y * 512 * 4) + (x * 4);
             [segmap[pos], segmap[pos + 1], segmap[pos + 2], segmap[pos + 3]] =
-                [new_color[0], new_color[1], new_color[2], new_color[3]];
+                [newColor[0], newColor[1], newColor[2], newColor[3]];
         }
 
-        const actual_color = getPixel(cx, cy, this.props.segmap);
-        const ac = JSON.stringify(actual_color); // used for value-based comparisons
+        // used for value-based comparisons
+        const actualColor = JSON.stringify(getPixel(cx, cy, this.props.segmap));
         let segmap = this.props.segmap.slice();
 
         // If the color of the current pixel is equivalent to the color of the bucket, do nothing.
         const actual = JSON.stringify([...getPixel(cx, cy, this.props.segmap).values()]);
-        const target = JSON.stringify(this.props.color_key[v])
+        const target = JSON.stringify(this.props.colorKey[v])
         if (actual === target) { return segmap; }
 
         // TODO: using a list as a queue is slow because dequeue is O(N), improve implementation.
@@ -82,10 +82,13 @@ class Canvas extends Component {
                 if ((c_cx < 0) || (c_cx >= 512) || (c_cy < 0) || (c_cy >= 512)) {
                     continue;
                 }
-                let cand_p_loc = [cx + dir[0], cy + dir[1]];
-                if (JSON.stringify(getPixel(cand_p_loc[0], cand_p_loc[1], segmap)) === ac) {
-                    paintPixel(cand_p_loc[0], cand_p_loc[1], segmap);
-                    queue.push(cand_p_loc);
+                const candidatePixelLocation = [cx + dir[0], cy + dir[1]];
+                const candidateColor = JSON.stringify(
+                    getPixel(candidatePixelLocation[0], candidatePixelLocation[1], segmap)
+                )
+                if (candidateColor === actualColor) {
+                    paintPixel(candidatePixelLocation[0], candidatePixelLocation[1], segmap);
+                    queue.push(candidatePixelLocation);
                 }
             }
         }
@@ -98,8 +101,8 @@ class Canvas extends Component {
         let y = e.pageY - e.target.offsetTop;
 
         if (this.props.tool === 'pen' || this.props.tool === 'eraser') {
-            let tool_value = this.props.tool === 'pen' ? this.props.tool_value : 9;
-            let segmap = this.penMatrix(x, y, this.props.tool_radius, tool_value);
+            let toolValue = this.props.tool === 'pen' ? this.props.toolValue : 9;
+            let segmap = this.penMatrix(x, y, this.props.toolRadius, toolValue);
             this.props.updateSegmentationMap(segmap);
         }
         // no need to handle 'reset', this is handled at the App level
@@ -117,7 +120,7 @@ class Canvas extends Component {
         if (this.props.tool === 'bucket') {
             let x = e.pageX - e.target.offsetLeft;
             let y = e.pageY - e.target.offsetTop;
-            let v = this.props.tool_value;
+            let v = this.props.toolValue;
             this.props.updateSegmentationMap(this.bucketMatrix(x, y, v));
         }
     }

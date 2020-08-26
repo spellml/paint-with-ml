@@ -32,7 +32,7 @@ class App extends Component {
         //     ref={(canvas) => this.canvasRef = canvas}
         //
         // I am not sure whether or not this is an error in the original blog post.
-        this.color_key = {
+        this.colorKey = {
             0: [241, 159, 240, 255],
             1: [154, 153,  64, 255],
             2: [255, 253,  57, 255],
@@ -44,8 +44,6 @@ class App extends Component {
             8: [0, 50, 50, 255],
             9: [255, 255, 255, 255],  // unset
         }
-        this.color_key_r = {};
-        Object.keys(this.color_key).forEach(v => this.color_key_r[this.color_key[v]] = v);
 
         // this.label_key = {
         //     0: 'sky',
@@ -62,10 +60,10 @@ class App extends Component {
         this.state = {
             'segmap': segmap,
             'tool': 'pen',
-            'tool_radius': 10,
-            'tool_value': 2,
+            'toolRadius': 10,
+            'toolValue': 2,
             // default output_picture is 512x512 empty
-            'output_picture': `
+            'outputPicture': `
                 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABHNCSVQICAgIf
                 AhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoA
                 AAQPSURBVHic7cExAQAAAMKg9U9tB2+gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
@@ -87,7 +85,7 @@ class App extends Component {
                 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADgNwLwAAHZZ/GIAAAAAElFTkS
                 uQmCC
             `,
-            'waiting': false  // TODO
+            'waiting': false
         }
 
         // These event handlers are passed down to and actually called within the child components,
@@ -101,19 +99,19 @@ class App extends Component {
         this.onBuildButtonClick = this.onBuildButtonClick.bind(this);
     }
 
-    onToolboxLabelButtonClick(n) {
+    onToolboxLabelButtonClick(toolValue) {
         return () => {
             let tool = this.state.tool === 'eraser' ? 'pen' : this.state.tool;
-            this.setState(Object.assign({}, this.state, {'tool': tool, 'tool_value': n}));
+            this.setState(Object.assign({}, this.state, {'tool': tool, 'toolValue': toolValue}));
         }
     }
 
-    onToolboxToolButtonClick(t) {
+    onToolboxToolButtonClick(tool) {
         return () => {
-            if (t === 'reset') {
+            if (tool === 'reset') {
                 this.updateSegmentationMap(this.getDefaultCanvas());
             } else {
-                this.setState(Object.assign({}, this.state, {'tool': t}));
+                this.setState(Object.assign({}, this.state, {'tool': tool}));
             }
         }
     }
@@ -134,7 +132,7 @@ class App extends Component {
         rp(opts)
             .then(png => {
                 this.setState(
-                    Object.assign({}, this.state, {'output_picture': png, 'waiting': false})
+                    Object.assign({}, this.state, {'outputPicture': png, 'waiting': false})
                 );
             })
             .catch(err => {
@@ -145,7 +143,7 @@ class App extends Component {
     }
 
     onBrushSizeSliderChange(v) {
-        this.setState(Object.assign({}, this.state, {'tool_radius': v / 2}));
+        this.setState(Object.assign({}, this.state, {'toolRadius': v / 2}));
     }
 
     updateSegmentationMap(segmap) {
@@ -161,11 +159,11 @@ class App extends Component {
 
     getDefaultCanvas() {
         let segmap = new Uint8ClampedArray(512 * 512 * 4);
-        let default_skybox_top_color = this.color_key[0];
-        let default_skybox_bottom_color = this.color_key[2];
+        let defaultSkyboxTopColor = this.colorKey[0];
+        let defaultSkyboxBottomColor = this.colorKey[2];
         for (let x of [...Array(512).keys()]) {
             for (let y of [...Array(512).keys()]) {
-                const color = y <= 256 ? default_skybox_top_color : default_skybox_bottom_color;
+                const color = y <= 256 ? defaultSkyboxTopColor : defaultSkyboxBottomColor;
                 const pos = (y * 512 * 4) + (x * 4);
                 segmap[pos] = color[0];
                 segmap[pos + 1] = color[1];
@@ -196,8 +194,8 @@ class App extends Component {
                         onLabelButtonClick={this.onToolboxLabelButtonClick}
                         onToolButtonClick={this.onToolboxToolButtonClick}
                         activeTool={this.state.tool}
-                        tool_radius={this.state.tool_radius}
-                        tool_value={this.state.tool_value}
+                        toolRadius={this.state.toolRadius}
+                        toolValue={this.state.toolValue}
                         waiting={this.state.waiting}
                         onBrushSizeSliderChange={this.onBrushSizeSliderChange}
                     />
@@ -212,11 +210,11 @@ class App extends Component {
                         width="512"
                         height="512"
                         tool={this.state.tool}
-                        tool_radius={this.state.tool_radius}
-                        tool_value={this.state.tool_value}
+                        toolRadius={this.state.toolRadius}
+                        toolValue={this.state.toolValue}
                         segmap={this.state.segmap}
                         updateSegmentationMap={this.updateSegmentationMap}
-                        color_key={this.color_key}
+                        colorKey={this.colorKey}
                         waiting={this.state.waiting}
                         ref={(canvas) => this.canvasRef = canvas}
                     />
@@ -227,7 +225,7 @@ class App extends Component {
                     />
                 </div>
                 <div id='output-container'>
-                    <OutputPicture output_picture={this.state.output_picture}/>
+                    <OutputPicture outputPicture={this.state.outputPicture}/>
                 </div>
                 <div id='output-actions-container'>
                     OUTPUT ACTIONS

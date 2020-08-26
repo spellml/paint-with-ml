@@ -5,7 +5,7 @@ import { Component } from 'react';
 class OutputPicture extends Component {
     render() {
         return <img
-            src={this.props.output_picture}
+            src={this.props.outputPicture}
             height={512}
             width={512}
         />

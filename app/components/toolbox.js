@@ -29,10 +29,10 @@ class Toolbox extends Component {
                 </div>
                 <div id='brush-size-slider-container'>
                     <div className='toolbox-section-label'>
-                        Brush Size: {this.props.tool_radius}px
+                        Brush Size: {this.props.toolRadius}px
                     </div>
                     <BrushSizeSlider
-                        tool_radius={this.props.tool_radius}
+                        toolRadius={this.props.toolRadius}
                         onChange={this.props.onBrushSizeSliderChange}
                     />
                 </div>
@@ -41,47 +41,47 @@ class Toolbox extends Component {
                     <ToolboxLabelButton
                         onClick={this.props.onLabelButtonClick}
                         classId={0}
-                        toolValue={this.props.tool_value}
+                        toolValue={this.props.toolValue}
                     />
                     <ToolboxLabelButton
                         onClick={this.props.onLabelButtonClick}
                         classId={1}
-                        toolValue={this.props.tool_value}
+                        toolValue={this.props.toolValue}
                     />
                     <ToolboxLabelButton
                         onClick={this.props.onLabelButtonClick}
                         classId={2}
-                        toolValue={this.props.tool_value}
+                        toolValue={this.props.toolValue}
                     />
                     <ToolboxLabelButton
                         onClick={this.props.onLabelButtonClick}
                         classId={3}
-                        toolValue={this.props.tool_value}
+                        toolValue={this.props.toolValue}
                     />
                     <ToolboxLabelButton
                         onClick={this.props.onLabelButtonClick}
                         classId={4}
-                        toolValue={this.props.tool_value}
+                        toolValue={this.props.toolValue}
                     />
                     <ToolboxLabelButton
                         onClick={this.props.onLabelButtonClick}
                         classId={5}
-                        toolValue={this.props.tool_value}
+                        toolValue={this.props.toolValue}
                     />
                     <ToolboxLabelButton
                         onClick={this.props.onLabelButtonClick}
                         classId={6}
-                        toolValue={this.props.tool_value}
+                        toolValue={this.props.toolValue}
                     />
                     <ToolboxLabelButton
                         onClick={this.props.onLabelButtonClick}
                         classId={7}
-                        toolValue={this.props.tool_value}
+                        toolValue={this.props.toolValue}
                     />
                     <ToolboxLabelButton
                         onClick={this.props.onLabelButtonClick}
                         classId={8}
-                        toolValue={this.props.tool_value}
+                        toolValue={this.props.toolValue}
                     />
                 </div>
                 <div id='reset-button-container'>
