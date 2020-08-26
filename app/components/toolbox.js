@@ -7,25 +7,37 @@ import BrushSizeSlider from './brush_size_slider';
 
 class Toolbox extends Component {
     render() {
+        const toolboxLabelButtons = [];
+        for (let label of Object.keys(this.props.colorKey)) {
+            if (label !== 'unset') {
+                toolboxLabelButtons.push(
+                    <ToolboxLabelButton
+                        onClick={this.props.onLabelButtonClick}
+                        labelValue={label}
+                        labelColor={this.props.colorKey[label]}
+                        toolValue={this.props.toolValue}
+                        key={label}
+                    />
+                );
+            }
+        }
+        const toolboxToolButtons = [];
+        for (let tool of ['pen', 'eraser', 'bucket']) {
+            toolboxToolButtons.push(
+                <ToolboxToolButton
+                    onClick={this.props.onToolButtonClick}
+                    tool={tool}
+                    activeTool={this.props.activeTool}
+                    key={tool}
+                />    
+            );
+        }
+
         return (
             <div id='toolbox-container'>
                 <div className='toolbox-section-label'>Tools</div>
                 <div id='tool-buttons-container'>
-                    <ToolboxToolButton
-                            onClick={this.props.onToolButtonClick}
-                            tool='pen'
-                            activeTool={this.props.activeTool}
-                    />
-                    <ToolboxToolButton
-                            onClick={this.props.onToolButtonClick}
-                            tool='eraser'
-                            activeTool={this.props.activeTool}
-                    />
-                    <ToolboxToolButton
-                            onClick={this.props.onToolButtonClick}
-                            tool='bucket'
-                            activeTool={this.props.activeTool}
-                    />
+                    {toolboxToolButtons}
                 </div>
                 <div id='brush-size-slider-container'>
                     <div className='toolbox-section-label'>
@@ -38,57 +50,10 @@ class Toolbox extends Component {
                 </div>
                 <div className='toolbox-section-label'>Elements</div>
                 <div id='label-buttons-container'>
-                    <ToolboxLabelButton
-                        onClick={this.props.onLabelButtonClick}
-                        classId={0}
-                        toolValue={this.props.toolValue}
-                    />
-                    <ToolboxLabelButton
-                        onClick={this.props.onLabelButtonClick}
-                        classId={1}
-                        toolValue={this.props.toolValue}
-                    />
-                    <ToolboxLabelButton
-                        onClick={this.props.onLabelButtonClick}
-                        classId={2}
-                        toolValue={this.props.toolValue}
-                    />
-                    <ToolboxLabelButton
-                        onClick={this.props.onLabelButtonClick}
-                        classId={3}
-                        toolValue={this.props.toolValue}
-                    />
-                    <ToolboxLabelButton
-                        onClick={this.props.onLabelButtonClick}
-                        classId={4}
-                        toolValue={this.props.toolValue}
-                    />
-                    <ToolboxLabelButton
-                        onClick={this.props.onLabelButtonClick}
-                        classId={5}
-                        toolValue={this.props.toolValue}
-                    />
-                    <ToolboxLabelButton
-                        onClick={this.props.onLabelButtonClick}
-                        classId={6}
-                        toolValue={this.props.toolValue}
-                    />
-                    <ToolboxLabelButton
-                        onClick={this.props.onLabelButtonClick}
-                        classId={7}
-                        toolValue={this.props.toolValue}
-                    />
-                    <ToolboxLabelButton
-                        onClick={this.props.onLabelButtonClick}
-                        classId={8}
-                        toolValue={this.props.toolValue}
-                    />
+                    {toolboxLabelButtons}
                 </div>
                 <div id='reset-button-container'>
-                    <ToolboxToolButton
-                                onClick={this.props.onToolButtonClick}
-                                tool='reset'
-                        />
+                    <ToolboxToolButton onClick={this.props.onToolButtonClick} tool='reset' />
                 </div>
                 <div id='logo'>
                     <svg width="80" height="33" viewBox="0 0 80 33" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -48,8 +48,10 @@ class Canvas extends Component {
         return segmap;
     }
 
-    bucketMatrix(cx, cy, v) {
-        const newColor = this.props.colorKey[v];
+    bucketMatrix(cx, cy, toolValue) {
+        console.log(toolValue);
+        console.log(this.props.colorKey);
+        const newColor = this.props.colorKey[toolValue];
         const getPixel = (x, y, segmap) => {
             let pos = (y * 512 * 4) + (x * 4);
             return segmap.slice(pos, pos + 4);                        
@@ -66,7 +68,7 @@ class Canvas extends Component {
 
         // If the color of the current pixel is equivalent to the color of the bucket, do nothing.
         const actual = JSON.stringify([...getPixel(cx, cy, this.props.segmap).values()]);
-        const target = JSON.stringify(this.props.colorKey[v])
+        const target = JSON.stringify(this.props.colorKey[toolValue])
         if (actual === target) { return segmap; }
 
         // TODO: using a list as a queue is slow because dequeue is O(N), improve implementation.
@@ -120,8 +122,7 @@ class Canvas extends Component {
         if (this.props.tool === 'bucket') {
             let x = e.pageX - e.target.offsetLeft;
             let y = e.pageY - e.target.offsetTop;
-            let v = this.props.toolValue;
-            this.props.updateSegmentationMap(this.bucketMatrix(x, y, v));
+            this.props.updateSegmentationMap(this.bucketMatrix(x, y, this.props.toolValue));
         }
     }
 

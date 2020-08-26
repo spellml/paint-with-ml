@@ -33,35 +33,23 @@ class App extends Component {
         //
         // I am not sure whether or not this is an error in the original blog post.
         this.colorKey = {
-            0: [241, 159, 240, 255],
-            1: [154, 153,  64, 255],
-            2: [255, 253,  57, 255],
-            3: [50, 0, 50, 255],
-            4: [249,  40,  55, 255],
-            5: [50, 0, 0, 255],
-            6: [45, 255, 254, 255],
-            7: [62, 110, 122, 255],
-            8: [0, 50, 50, 255],
-            9: [255, 255, 255, 255],  // unset
+            sky: [245, 216, 122, 255],
+            tree: [13, 113, 125, 255],
+            plant: [224, 27, 66, 255],
+            grass: [255, 190, 203, 255],
+            rock: [114, 102, 118, 255],
+            mountain: [245, 147, 34, 255],
+            river: [109, 0, 161, 255],
+            lake: [62, 110, 122, 255],
+            ocean: [0, 50, 50, 255],
+            unset: [255, 255, 255, 255]
         }
-
-        // this.label_key = {
-        //     0: 'sky',
-        //     1: 'tree',
-        //     2: 'grass',
-        //     3: 'earth',
-        //     4: 'mountain',
-        //     5: 'plant',
-        //     6: 'water',
-        //     7: 'sea',
-        //     8: 'river'
-        // }
         let segmap = this.getDefaultCanvas();
         this.state = {
             'segmap': segmap,
             'tool': 'pen',
             'toolRadius': 10,
-            'toolValue': 2,
+            'toolValue': 'grass',
             // default output_picture is 512x512 empty
             'outputPicture': `
                 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABHNCSVQICAgIf
@@ -159,11 +147,9 @@ class App extends Component {
 
     getDefaultCanvas() {
         let segmap = new Uint8ClampedArray(512 * 512 * 4);
-        let defaultSkyboxTopColor = this.colorKey[0];
-        let defaultSkyboxBottomColor = this.colorKey[2];
         for (let x of [...Array(512).keys()]) {
             for (let y of [...Array(512).keys()]) {
-                const color = y <= 256 ? defaultSkyboxTopColor : defaultSkyboxBottomColor;
+                const color = y <= 256 ? this.colorKey['sky'] : this.colorKey['grass'];
                 const pos = (y * 512 * 4) + (x * 4);
                 segmap[pos] = color[0];
                 segmap[pos + 1] = color[1];
@@ -196,6 +182,7 @@ class App extends Component {
                         activeTool={this.state.tool}
                         toolRadius={this.state.toolRadius}
                         toolValue={this.state.toolValue}
+                        colorKey={this.colorKey}
                         waiting={this.state.waiting}
                         onBrushSizeSliderChange={this.onBrushSizeSliderChange}
                     />
