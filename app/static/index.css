@@ -1,51 +1,185 @@
-#frame {
+body {
+    background-color: #232323;
+    font-family: Roboto, sans-serif;
+    color: white;
+    margin: 0;
+    height: 100vh;
+}
+#root {
+    height: 100%
+}
+#app {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-gap: 0px;
-    grid-auto-rows: minmax(100px, auto);
+    grid-template-columns: 272px 1fr;
+    grid-template-rows: 80px 1fr;
+    height: 100%;
+}
+#title-frame {
+    grid-column: 1 / span 2;
+    grid-row: 1;
+    border:0px solid #493F4C;
+    border-bottom-width: 2px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items:center;
+    padding-left:24px;
+}
+#interior-frame {
+    grid-column: 2;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: 1fr 512px 1fr 512px 1fr;
+    grid-template-rows: 26px 16px 512px 24px 40px 24px 18px 24px 1fr;
+    padding-top: 24px;
+    border: 0px solid #493F4C;
+    border-left-width: 2px;
+}
+#side-panel-frame {
+    grid-column: 1;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+    margin-left: 24px;
+}
+#title-text-container {
+    font-weight: bold;
+    font-size: 24px;
+    line-height: 34px;
+    letter-spacing: 0.6px;
+}
+#bob-container {
+    padding-right:48px;
+}
+.picture-header {
+    font-weight: bold;
+    font-size: 18px;
+    vertical-align: middle;
+    letter-spacing: -0.2px;
+    text-transform: uppercase;
+    border: 0px solid #EBE8F2;
+    border-bottom-width: 1px;
+}
+#canvas-header {
+    grid-column: 2;
+    grid-row: 1;
+}
+#output-header {
+    grid-column: 4;
+    grid-row: 1;
 }
 #canvas-container {
-    grid-column: 1;
-    grid-row: 1;
+    grid-column: 2;
+    grid-row: 3;
 }
 #output-container {
-    grid-column: 3;
-    grid-row: 1;
+    grid-column: 4;
+    grid-row: 3;
 }
 #toolbox-container {
-    grid-column: 1;
-    grid-row: 2;
-}
-#spacer {
     grid-column: 2;
-    grid-row: 2;
+    grid-row: 3;
 }
-#social-sharer-container {
-    grid-column: 3;
-    grid-row: 2;
-}
-#label-buttons-container {
-    display: grid;
-    width: 512px;
-    grid-template-columns: repeat(9, 50px);
-    justify-content: space-between;
-}
-#tool-buttons-container {
-    display: grid;
-    width: 512px;
-    grid-template-columns: repeat(4, 50px);
-    justify-content: space-between;
-}
-.class-selector, .build-button, .tool-selector {
-    border-radius: 15px;
-    font-size: 30px;
-}
-#build-button-container {
+#canvas-actions-container {
     grid-column: 2;
-    grid-row: 1;
+    grid-row: 5;
     display: flex;
     align-items: center;
 }
+#output-actions-container {
+    grid-column: 4;
+    grid-row: 5;
+    display: flex;
+    align-items: center;
+}
+#canvas-explainer-title-container {
+    grid-column: 2;
+    grid-row: 7;
+}
+#output-explainer-title-container {
+    grid-column: 4;
+    grid-row: 7;
+}
+#canvas-explainer-text-container {
+    grid-column: 2;
+    grid-row: 9;
+}
+#output-explainer-text-container {
+    grid-column: 4;
+    grid-row: 9;
+}
+.explainer-text-container {
+    font-size: 14px;
+    line-height: 24px;
+}
+#label-buttons-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+#tool-buttons-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+#brush-size-slider-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.toolbox-section-label {
+    font-weight: bold;
+    font-size: 21px;
+    line-height: 25px;
+    letter-spacing: -0.2px;
+    margin-bottom: 16px;
+    margin-top: 24px;
+}
+#reset-button-container {
+    margin-top: 42px;
+}
+#logo {
+    margin-top: 56px;
+}
+.button-image {
+    display: block;
+    margin: auto;
+    width: 20px;
+    height: 20px;
+}
+.selector {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 20px;
+    margin-left: 16px;
+}
+.selector-button {
+    cursor: pointer;
+    border-radius: 50px;
+    background-color: lightgray;
+}
+.selector-image {
+    margin-right: 24px;
+}
+.selector-name {
+    text-transform: capitalize;
+}
 .app.waiting {
     cursor: wait;
+}
+input[type=range] {
+    background: transparent;
+}
+input[type=range]::-moz-range-track {
+    background-color: #F2F0F6;
+}
+input[type=range]::-webkit-slider-runnable-track {
+    background-color: #F2F0F6;
+}
+input[type=range]::-webkit-slider-thumb {
+    border-width: 0px;
+}
+input[type=range]::-moz-range-thumb {
+    border-width: 0px;
 }
