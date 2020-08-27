@@ -2,7 +2,7 @@ import React from 'react';
 import { Component } from 'react';
 import Canvas from './canvas';
 import Toolbox from './toolbox';
-import BuildButton from './build_button';
+import FancyButton from './fancy_button';
 import OutputPicture from './output_picture';
 import rp from 'request-promise-native';
 
@@ -85,6 +85,7 @@ class App extends Component {
         this.onBrushSizeSliderChange = this.onBrushSizeSliderChange.bind(this);
         this.updateSegmentationMap = this.updateSegmentationMap.bind(this);
         this.onBuildButtonClick = this.onBuildButtonClick.bind(this);
+        this.onResetButtonClick = this.onResetButtonClick.bind(this);
     }
 
     onToolboxLabelButtonClick(toolValue) {
@@ -96,11 +97,7 @@ class App extends Component {
 
     onToolboxToolButtonClick(tool) {
         return () => {
-            if (tool === 'reset') {
-                this.updateSegmentationMap(this.getDefaultCanvas());
-            } else {
-                this.setState(Object.assign({}, this.state, {'tool': tool}));
-            }
+            this.setState(Object.assign({}, this.state, {'tool': tool}));
         }
     }
 
@@ -132,6 +129,10 @@ class App extends Component {
 
     onBrushSizeSliderChange(v) {
         this.setState(Object.assign({}, this.state, {'toolRadius': v / 2}));
+    }
+
+    onResetButtonClick() {
+        this.updateSegmentationMap(this.getDefaultCanvas());
     }
 
     updateSegmentationMap(segmap) {
@@ -207,9 +208,8 @@ class App extends Component {
                     />
                 </div>
                 <div id='canvas-actions-container'>
-                    <BuildButton
-                        onClick={this.onBuildButtonClick}
-                    />
+                    <FancyButton onClick={this.onResetButtonClick} visualType="unfilled" buttonFunction="reset" />
+                    <FancyButton onClick={this.onBuildButtonClick} visualType="filled" buttonFunction="run" />
                 </div>
                 <div id='output-container'>
                     <OutputPicture outputPicture={this.state.outputPicture}/>

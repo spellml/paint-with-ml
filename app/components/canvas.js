@@ -25,15 +25,16 @@ class Canvas extends Component {
         this.width = this.ctx.canvas.width;
         this.height = this.ctx.canvas.height;
     }
-
-    penMatrix(cx, cy, r, v) {
-        let segmap = this.props.segmap.slice();
-        let [xmin, xmax] = [Math.max(0, cx - r), Math.min(512, cx + r)];
-        let [ymin, ymax] = [Math.max(0, cy - r), Math.min(512, cy + r)];
-        let color = this.props.colorKey[v];
+ 
+    penMatrix(cx, cy, r, toolValue) {
+        const color = this.props.colorKey[toolValue];
+        const segmap = this.props.segmap.slice();
+        const [xmin, xmax] = [Math.max(0, cx - r), Math.min(512, cx + r)];
+        const [ymin, ymax] = [Math.max(0, cy - r), Math.min(512, cy + r)];
         const dist = (cx, x, cy, y) => {
             return (Math.abs(cx - x)**2 + Math.abs(cy - y)**2)**(1/2)
         }
+
         for (let x of [...Array(xmax - xmin).keys()].map(v => v + xmin)) {
             for (let y of [...Array(ymax - ymin).keys()].map(v => v + ymin)) {
                 if (dist(cx, x, cy, y) <= r) {
@@ -103,7 +104,7 @@ class Canvas extends Component {
         let y = e.pageY - e.target.offsetTop;
 
         if (this.props.tool === 'pen' || this.props.tool === 'eraser') {
-            let toolValue = this.props.tool === 'pen' ? this.props.toolValue : 9;
+            let toolValue = this.props.tool === 'pen' ? this.props.toolValue : 'unset';
             let segmap = this.penMatrix(x, y, this.props.toolRadius, toolValue);
             this.props.updateSegmentationMap(segmap);
         }
