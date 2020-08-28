@@ -4,6 +4,9 @@ import Canvas from './canvas';
 import Toolbox from './toolbox';
 import FancyButton from './fancy_button';
 import OutputPicture from './output_picture';
+import DownloadButton from './download_button';
+import TweetButton from './tweet_button';
+
 import rp from 'request-promise-native';
 
 
@@ -39,9 +42,9 @@ class App extends Component {
             grass: [255, 190, 203, 255],
             rock: [114, 102, 118, 255],
             mountain: [245, 147, 34, 255],
-            river: [109, 0, 161, 255],
-            lake: [62, 110, 122, 255],
-            ocean: [0, 50, 50, 255],
+            river: [21, 189, 209, 255],
+            lake: [109, 0, 161, 255],
+            ocean: [119, 91, 223, 255],
             unset: [255, 255, 255, 255]
         }
         let segmap = this.getDefaultCanvas();
@@ -215,7 +218,8 @@ class App extends Component {
                     <OutputPicture outputPicture={this.state.outputPicture}/>
                 </div>
                 <div id='output-actions-container'>
-                    OUTPUT ACTIONS
+                    <DownloadButton outputPicture={this.state.outputPicture}/>
+                    <TweetButton/>
                 </div>
                 <div id='canvas-explainer-title-container'>
                     CANVAS EXPLAINER TITLE

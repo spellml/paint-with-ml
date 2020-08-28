@@ -1,9 +1,10 @@
 body {
     background-color: #232323;
-    font-family: Roboto, sans-serif;
+    font-family: objektiv-mk1, Roboto, sans-serif;
     color: white;
     margin: 0;
     height: 100vh;
+    cursor: default;
 }
 #root {
     height: 100%
@@ -92,6 +93,8 @@ body {
     grid-row: 5;
     display: flex;
     align-items: center;
+    justify-content: right;
+    grid-column-gap: 24px;
 }
 #canvas-explainer-title-container {
     grid-column: 2;
@@ -146,6 +149,7 @@ body {
 }
 #logo {
     margin-top: 56px;
+    margin-left: 36px;
 }
 .button-image {
     display: block;
@@ -157,10 +161,10 @@ body {
     display: inline-flex;
     flex-direction: row;
     align-items: center;
-    padding: 8px;
+    padding: 6px;
     padding-left: 16px;
     padding-right: 16px;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     cursor: pointer;
 }
 .selector.selected {

@@ -49,9 +49,9 @@ class Predictor(BasePredictor):
             (255, 190, 203, 255): 10,  # grass
             (114, 102, 118, 255): 14,  # rock
             (245, 147, 34, 255): 17,  # mountain
-            (109, 0, 161, 255): 61,  # river
-            (62, 110, 122, 255): 22,  # lake
-            (0, 50, 50, 255): 27  # ocean
+            (21, 189, 209, 255): 61,  # river
+            (109, 0, 161, 255): 22,  # lake
+            (119, 91, 223, 255): 27,  # ocean
         }
         # base64 encoded PNG -> PIL image -> array
         data_uri = data_uri[data_uri.find(',') + 1:]
