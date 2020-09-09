@@ -50,7 +50,7 @@ class ToolboxLabelButton extends Component {
     }
 
     render() {
-        const className = this.props.toolValue == this.props.labelValue ? 'selector selected' : 'selector';
+        const className = this.props.toolValue == this.props.labelValue ? 'selector selected' : 'selector unselected';
         const backgroundColor = this.props.toolValue == this.props.labelValue ?
             this.getLabelColorAsRGB() :
             "transparent";
@@ -66,7 +66,7 @@ class ToolboxLabelButton extends Component {
             <div className='selector-name'>
                 {this.props.labelValue}
             </div>
-        </div>
+        </div>;
     }
 }
 

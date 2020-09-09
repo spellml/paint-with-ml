@@ -22,7 +22,7 @@ class ToolboxToolButton extends Component {
     }
 
     render() {
-        const className = this.props.activeTool == this.props.tool ? 'selector selected' : 'selector';
+        const className = this.props.activeTool == this.props.tool ? 'selector selected' : 'selector unselected';
         return <div
             className={className}
             onClick={this.props.onClick(this.props.tool)}

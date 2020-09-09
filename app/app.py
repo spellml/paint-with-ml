@@ -17,6 +17,9 @@ def index():
 def favicon():
     return send_file('favicon.ico')
 
+@app.route('/default.png', methods=['GET'])
+def default():
+    return send_file('static/img/default.png')
 
 @app.route('/predict', methods=['POST'])
 def predict():

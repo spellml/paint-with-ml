@@ -173,6 +173,9 @@ body {
     color: black;
     font-weight: bold;
 }
+.selector.unselected:hover {
+    font-weight: bold;
+}
 .selector-button {
     cursor: pointer;
     border-radius: 50px;
