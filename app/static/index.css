@@ -49,7 +49,7 @@ body {
     line-height: 34px;
     letter-spacing: 0.6px;
 }
-#bob-container {
+#logo-container {
     padding-right:48px;
 }
 .picture-header {
@@ -99,10 +99,12 @@ body {
 #canvas-explainer-title-container {
     grid-column: 2;
     grid-row: 7;
+    font-weight: bold;
 }
 #output-explainer-title-container {
     grid-column: 4;
     grid-row: 7;
+    font-weight: bold;
 }
 #canvas-explainer-text-container {
     grid-column: 2;
@@ -115,6 +117,9 @@ body {
 .explainer-text-container {
     font-size: 14px;
     line-height: 24px;
+}
+.explainer-text-container > p {
+    margin-top: 0px;
 }
 #label-buttons-container {
     display: inline-flex;
@@ -139,7 +144,6 @@ body {
 .toolbox-section-label {
     font-weight: bold;
     font-size: 21px;
-    line-height: 25px;
     letter-spacing: -0.2px;
     margin-bottom: 16px;
     margin-top: 24px;
@@ -186,6 +190,14 @@ body {
 }
 .selector-name {
     text-transform: capitalize;
+    /* HACK: without this, the text is no aligned relative to the button, because the box model
+       applies padding around the content, including the letters that hang below the bottom of the
+       text line-height, e.g. the "y" in "Sky". I don't know how to fix this issue without
+       resorting to flexbox-block layout (which creates problems with button width), so I've just
+       hacked around it here by bumping the text two pixels.
+    */
+    position: relative;
+    top: 2px;
 }
 .app.waiting {
     cursor: wait;
@@ -240,4 +252,10 @@ input[type=range]::-moz-range-thumb {
 .fancy-button.unfilled:hover {
     background: white;
     color: black;
+}
+#placeholder-picture {
+    height: 512px;
+    width: 512px;
+    background-image: url("/default.png");
+    background-size: 512px;
 }

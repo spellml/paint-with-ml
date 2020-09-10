@@ -103,8 +103,8 @@ class Canvas extends Component {
         let x = e.pageX - e.target.offsetLeft;
         let y = e.pageY - e.target.offsetTop;
 
-        if (this.props.tool === 'pen' || this.props.tool === 'eraser') {
-            let toolValue = this.props.tool === 'pen' ? this.props.toolValue : 'unset';
+        if (this.props.tool === 'brush' || this.props.tool === 'eraser') {
+            let toolValue = this.props.tool === 'brush' ? this.props.toolValue : 'unset';
             let segmap = this.penMatrix(x, y, this.props.toolRadius, toolValue);
             this.props.updateSegmentationMap(segmap);
         }
@@ -120,7 +120,7 @@ class Canvas extends Component {
         if (this.props.waiting) return;
 
         this.mouse_down = false;
-        if (this.props.tool === 'bucket') {
+        if (this.props.tool === 'fill') {
             let x = e.pageX - e.target.offsetLeft;
             let y = e.pageY - e.target.offsetTop;
             this.props.updateSegmentationMap(this.bucketMatrix(x, y, this.props.toolValue));

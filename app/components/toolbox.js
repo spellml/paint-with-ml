@@ -22,7 +22,7 @@ class Toolbox extends Component {
             }
         }
         const toolboxToolButtons = [];
-        for (let tool of ['pen', 'eraser', 'bucket']) {
+        for (let tool of ['brush', 'fill', 'eraser']) {
             toolboxToolButtons.push(
                 <ToolboxToolButton
                     onClick={this.props.onToolButtonClick}
@@ -41,7 +41,7 @@ class Toolbox extends Component {
                 </div>
                 <div id='brush-size-slider-container'>
                     <div className='toolbox-section-label'>
-                        Brush Size: {this.props.toolRadius}px
+                        Brush Radius: {this.props.toolRadius}px
                     </div>
                     <BrushSizeSlider
                         toolRadius={this.props.toolRadius}

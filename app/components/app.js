@@ -37,22 +37,22 @@ class App extends Component {
         // I am not sure whether or not this is an error in the original blog post.
         this.colorKey = {
             sky: [245, 216, 122, 255],
-            tree: [13, 113, 125, 255],
-            plant: [224, 27, 66, 255],
-            grass: [255, 190, 203, 255],
-            rock: [114, 102, 118, 255],
+            grass: [210, 250, 255, 255],
+            tree: [36, 207, 156, 255],
+            plant: [236, 118, 142, 255],
+            rock: [174, 162, 177, 255],
             mountain: [245, 147, 34, 255],
-            river: [21, 189, 209, 255],
-            lake: [109, 0, 161, 255],
-            ocean: [119, 91, 223, 255],
+            river: [68, 202, 218, 255],
+            lake: [176, 50, 235, 255],
+            ocean: [138, 115, 227, 255],
             unset: [255, 255, 255, 255]
         }
         let segmap = this.getDefaultCanvas();
         this.state = {
             'segmap': segmap,
-            'tool': 'pen',
+            'tool': 'brush',
             'toolRadius': 10,
-            'toolValue': 'grass',
+            'toolValue': 'sky',
             // default output_picture is 512x512 empty
             'outputPicture': `
                 data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAABHNCSVQICAgIf
@@ -76,7 +76,8 @@ class App extends Component {
                 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADgNwLwAAHZZ/GIAAAAAElFTkS
                 uQmCC
             `,
-            'waiting': false
+            'waiting': false,
+            'showPlaceholderOutputImage': true
         }
 
         // These event handlers are passed down to and actually called within the child components,
@@ -93,7 +94,7 @@ class App extends Component {
 
     onToolboxLabelButtonClick(toolValue) {
         return () => {
-            let tool = this.state.tool === 'eraser' ? 'pen' : this.state.tool;
+            let tool = this.state.tool === 'eraser' ? 'brush' : this.state.tool;
             this.setState(Object.assign({}, this.state, {'tool': tool, 'toolValue': toolValue}));
         }
     }
@@ -120,7 +121,9 @@ class App extends Component {
         rp(opts)
             .then(png => {
                 this.setState(
-                    Object.assign({}, this.state, {'outputPicture': png, 'waiting': false})
+                    Object.assign(
+                        {}, this.state, {'outputPicture': png, 'waiting': false, 'showPlaceholderOutputImage': false}
+                    )
                 );
             })
             .catch(err => {
@@ -169,11 +172,11 @@ class App extends Component {
         return <div id='app'>
             <div id='title-frame'>
                 <div id='title-text-container'>
-                    Paint like Bob Ross
+                    Paint with Machine Learning
                 </div>
-                <div id='bob-container'>
-                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fillRule="evenodd" clipRule="evenodd" d="M17.3859 0.148947C14.0392 0.623126 11.0405 2.86119 9.47119 6.05689C8.60415 7.82197 8.49133 8.33324 8.50118 10.4537C8.51491 13.4185 9.50641 15.8534 11.4978 17.8123C12.2239 18.5264 12.82 19.3183 12.8227 19.572C12.8254 19.8257 13.1378 20.5718 13.5166 21.23L14.2055 22.4267L10.9002 24.0721C6.79723 26.1145 6.25164 26.787 6.25164 29.8005V31.8504H19.1257H32L31.8523 29.7805C31.6105 26.3963 30.9563 25.7115 25.7334 23.3789L23.8746 22.5487L24.4649 21.4451C24.7894 20.8381 25.055 20.1725 25.055 19.966C25.055 19.7599 25.7024 18.8744 26.4933 17.9987C28.8124 15.4319 29.3828 13.9737 29.3828 10.6096C29.3828 8.17139 29.2726 7.53357 28.6076 6.1221C27.6505 4.09076 25.8352 2.18836 23.9295 1.22056C22.6535 0.572567 21.8805 0.360757 19.5334 0.0167156C19.2051 -0.0314502 18.2386 0.028084 17.3859 0.148947ZM21.1881 9.11616C23.3779 9.5326 23.8611 10.0445 23.8611 11.949C23.8611 12.7992 23.6501 14.1155 23.3922 14.8745L22.9231 16.2543L21.557 15.5261C19.8354 14.6086 18.3765 14.6032 16.5935 15.5082C15.824 15.8986 15.1325 16.1179 15.057 15.9955C14.7722 15.5339 14.0118 12.2463 14.0118 11.4775C14.0118 9.35699 17.1036 8.33982 21.1881 9.11616ZM2.15221 9.86916C0.330074 11.1499 -0.620541 14.6974 0.448564 16.227C0.830899 16.7742 1.19771 16.8921 2.52081 16.8921C3.84391 16.8921 4.21073 16.7742 4.59306 16.227C5.43325 15.025 5.12732 13.3706 3.79288 11.9005C3.46665 11.5412 3.11387 10.8316 3.0094 10.3236C2.82644 9.43507 2.79421 9.41802 2.15221 9.86916ZM20.7448 17.6176C21.3036 18.0289 21.2943 18.0556 20.484 18.3655C19.3564 18.7969 18.1998 18.7547 17.2949 18.2488L16.5487 17.8315L17.2949 17.5302C18.3926 17.0875 20.0823 17.1302 20.7448 17.6176ZM1.07833 18.8866C0.603767 19.362 1.11444 28.8049 1.74152 31.1555C1.90896 31.7825 2.14982 32 2.67811 32C3.52366 32 3.65409 31.5204 4.13731 26.6377C4.49666 23.0094 4.54531 20.3801 4.27281 19.3602C4.1182 18.7828 3.89256 18.6871 2.68497 18.6871C1.91075 18.6871 1.18757 18.7768 1.07833 18.8866ZM20.8765 24.6594C20.8765 24.9118 20.5858 25.6975 19.323 28.8588C18.9809 29.715 19.126 29.9453 17.7712 26.3906L17.0015 24.3713H18.9391C20.0047 24.3713 20.8765 24.5008 20.8765 24.6594Z" fill="white"/>
+                <div id='logo-container'>
+                    <svg width="35" height="34" viewBox="0 0 35 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fillRule="evenodd" clipRule="evenodd" d="M11.8568 3.98763C11.8972 4.11414 11.9862 4.2194 12.1043 4.28017L29.2208 13.0903C29.3389 13.1511 29.4763 13.1624 29.6027 13.1217L29.8538 13.041C30.5147 12.829 31.0769 12.3513 31.3951 11.7331C31.7738 10.9973 31.7846 10.1143 31.4248 9.37078L31.1482 8.79865C29.9921 6.41137 28.2214 4.34331 26.0585 2.82156C25.7418 2.59873 25.7697 2.12099 26.1453 2.02683C26.7055 1.8864 27.2988 1.87685 27.8837 2.01344L28.1285 2.07079C28.3974 2.13377 28.6664 1.96692 28.7294 1.6981L28.8583 1.14818C28.9214 0.87924 28.7544 0.61013 28.4854 0.547197L28.2416 0.490145C26.7576 0.143085 25.2313 0.453084 24.01 1.31275C23.8545 1.42222 23.6528 1.44682 23.4792 1.36921C20.6737 0.115173 17.5122 -0.300403 14.4769 0.217704L13.8509 0.324342C13.0368 0.463597 12.3241 0.986177 11.9457 1.72134C11.6271 2.34024 11.5654 3.07463 11.7766 3.73636L11.8568 3.98763ZM28.1611 15.051C28.3305 15.1357 28.4375 15.3088 28.4375 15.4982V15.621C28.4375 18.8939 26.4335 21.1176 23.6057 21.9853C22.9081 22.1518 21.9786 22.2829 20.7811 22.2829C20.1193 22.2829 19.5241 22.2429 18.9958 22.1789C15.6325 21.3603 13.125 18.2821 13.125 14.621V8.34194C13.125 7.97025 13.5162 7.7285 13.8486 7.89473L28.1611 15.051ZM16.6261 22.6618C16.2733 22.7226 15.9111 22.7886 15.5372 22.859L11.9221 24.6586C7.43447 26.8925 6.83773 27.6281 6.83773 30.9241V33.1662H20.9187H35L34.8384 30.9022C34.574 27.2008 33.8584 26.4518 28.1459 23.9005L26.1128 22.9925C25.603 22.8473 25.1147 22.725 24.6424 22.6235L20.9517 29.7206C20.8784 29.8616 20.6778 29.8649 20.5999 29.7264L16.6261 22.6618ZM0.490617 16.0781C-0.678716 14.4051 0.361018 10.525 2.35398 9.12419C3.05617 8.63075 3.09142 8.6494 3.29154 9.62122C3.40579 10.1768 3.79165 10.953 4.14846 11.346C5.608 12.9539 5.94261 14.7634 5.02366 16.0781C4.60548 16.6766 4.20428 16.8055 2.75714 16.8055C1.31 16.8055 0.908796 16.6766 0.490617 16.0781ZM1.90479 32.4061C1.21892 29.8352 0.66037 19.507 1.17942 18.9871C1.2989 18.867 2.08988 18.7688 2.93669 18.7688C4.25749 18.7688 4.50429 18.8735 4.67339 19.505C4.97143 20.6205 4.91822 23.4964 4.52518 27.4648C3.99666 32.8053 3.854 33.3298 2.92918 33.3298C2.35137 33.3298 2.08792 33.0919 1.90479 32.4061Z" fill="white"/>
                     </svg>
                 </div>
             </div>
@@ -215,23 +218,48 @@ class App extends Component {
                     <FancyButton onClick={this.onBuildButtonClick} visualType="filled" buttonFunction="run" />
                 </div>
                 <div id='output-container'>
-                    <OutputPicture outputPicture={this.state.outputPicture}/>
+                    { this.state.showPlaceholderOutputImage ? 
+                        <div id='placeholder-picture'/> : 
+                        <OutputPicture outputPicture={this.state.outputPicture}/> 
+                    }
                 </div>
                 <div id='output-actions-container'>
-                    <DownloadButton outputPicture={this.state.outputPicture}/>
+                    <DownloadButton
+                        placeHolderImageActive={this.state.showPlaceholderOutputImage}
+                        outputPicture={this.state.outputPicture}
+                    />
                     <TweetButton/>
                 </div>
                 <div id='canvas-explainer-title-container'>
-                    CANVAS EXPLAINER TITLE
+                    About the Model
                 </div>
                 <div id='output-explainer-title-container'>
-                    OUTPUT EXPLAINER TITLE
+                    About Spell
                 </div>
                 <div id='canvas-explainer-text-container' className='explainer-text-container'>
-                    Canvas explainer text goes here
+                    <p>
+                        This app uses a version of the GauGAN deep learning model to transform an input segmentation masks into a landscape painting.
+                    </p>
+                    <p>
+                        <a href="https://github.com/NVlabs/SPADE" style={{color: 'white'}}>GauGAN</a>, released in 2019, is the most powerful image-to-image translation algorithm currently known. This version of the model has been trained on the popular ADE20K dataset, then fine-tuned on a dataset of 250 paintings from Bob Ross's beloved PBS series, <a href="https://www.youtube.com/user/BobRossInc" style={{color: 'white'}}>"The Joy of Painting"</a>.
+                    </p>
+                    <p>
+                        Choose from nine different semantic brushes to craft your painting. Then click on the "Run" button to generate a result!
+                    </p>
+                    <p>
+                        The <a href="https://www.kaggle.com/residentmario/segmented-bob-ross-images" style={{color: 'white'}}>dataset</a> and <a href="https://github.com/ResidentMario/paint-with-ml" style={{color: 'white'}}>code</a> are publicly available. To learn more, check out our blog post: $LINK.
+                    </p>
                 </div>
                 <div id='output-explainer-text-container' className='explainer-text-container'>
-                    Output explainer text goes here
+                    <p>
+                        <a href="https://spell.ml/" style={{color: 'white'}}>Spell</a> is a powerful end-to-end machine learning model training and deployment platform. The model powering this application was trained in Spell runs and workspaces and then deployed into production using a Spell model server.
+                    </p>
+                    <p>
+                        We provide an easy-to-use API for deploying your model server publicly or privately. And because we serve models using Kubernetes, the service automatically scales up and down based on demand.
+                    </p>
+                    <p>
+                        $CTA
+                    </p>
                 </div>
             </div>
         </div>

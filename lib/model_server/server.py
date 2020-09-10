@@ -44,14 +44,14 @@ class Predictor(BasePredictor):
         # NOTE(aleksey): keys must match those set in app.js. Values are labels from ADE20K.
         color_key = {
             (245, 216, 122, 255): 3,  # sky
-            (13, 113, 125, 255): 5,  # tree
-            (224, 27, 66, 255): 18,  # plant
-            (255, 190, 203, 255): 10,  # grass
-            (114, 102, 118, 255): 14,  # rock
+            (36, 207, 156, 255): 5,  # tree
+            (236, 118, 142, 255): 18,  # plant
+            (210, 250, 255, 255): 10,  # grass
+            (174, 162, 177, 255): 14,  # rock
             (245, 147, 34, 255): 17,  # mountain
-            (21, 189, 209, 255): 61,  # river
-            (109, 0, 161, 255): 22,  # lake
-            (119, 91, 223, 255): 27,  # ocean
+            (68, 202, 218, 255): 61,  # river
+            (176, 50, 235, 255): 22,  # lake
+            (138, 115, 227, 255): 27,  # ocean
         }
         # base64 encoded PNG -> PIL image -> array
         data_uri = data_uri[data_uri.find(',') + 1:]

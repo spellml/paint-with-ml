@@ -13,9 +13,9 @@ def index():
     return send_file('index.html')
 
 
-@app.route('/favicon.ico', methods=['GET'])
+@app.route('/favicon.png', methods=['GET'])
 def favicon():
-    return send_file('favicon.ico')
+    return send_file('favicon.png')
 
 @app.route('/default.png', methods=['GET'])
 def default():
