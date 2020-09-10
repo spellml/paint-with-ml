@@ -26,17 +26,6 @@ from options.test_options import TestOptions
 
 
 class Predictor(BasePredictor):
-    # def __init__(self):
-    #     print("This gets logged, right?")
-    #     pass
-
-    # def predict(self, payload):
-    #     return {
-    #         'SPADE_CODE_DIR': os.environ["SPADE_CODE_DIR"],
-    #         'MODEL_CONFIG_PATH': os.environ["MODEL_CONFIG_PATH"],
-    #         'PWD': os.environ["PWD"]
-    #     }
-
     def __init__(self):
         opt = TestOptions()
         with open(model_config_path, 'r') as fp:
@@ -52,18 +41,18 @@ class Predictor(BasePredictor):
         sys.path.pop()
  
     def png_data_uri_to_batch_tensor(self, data_uri):
+        # NOTE(aleksey): keys must match those set in app.js. Values are labels from ADE20K.
         color_key = {
-            (241, 159, 240, 255): 3,
-            (154, 153,  64, 255): 5,
-            (255, 253,  57, 255): 10,
-            (50, 0, 50, 255): 14,
-            (249,  40,  55, 255): 17,
-            (50, 0, 0, 255): 18,
-            (45, 255, 254, 255): 22,
-            (62, 110, 122, 255): 27,
-            (0, 50, 50, 255): 61
+            (245, 216, 122, 255): 3,  # sky
+            (36, 207, 156, 255): 5,  # tree
+            (236, 118, 142, 255): 18,  # plant
+            (210, 250, 255, 255): 10,  # grass
+            (174, 162, 177, 255): 14,  # rock
+            (245, 147, 34, 255): 17,  # mountain
+            (68, 202, 218, 255): 61,  # river
+            (176, 50, 235, 255): 22,  # lake
+            (138, 115, 227, 255): 27,  # ocean
         }
-
         # base64 encoded PNG -> PIL image -> array
         data_uri = data_uri[data_uri.find(',') + 1:]
         segmap_c = np.array(
