@@ -1,4 +1,4 @@
 # model serving requirements
 spell
-pillow==6.1
+pillow==7.1.0
 flask==1.1.1
