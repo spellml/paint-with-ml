@@ -50,8 +50,6 @@ class Canvas extends Component {
     }
 
     bucketMatrix(cx, cy, toolValue) {
-        console.log(toolValue);
-        console.log(this.props.colorKey);
         const newColor = this.props.colorKey[toolValue];
         const getPixel = (x, y, segmap) => {
             let pos = (y * 512 * 4) + (x * 4);
@@ -114,12 +112,18 @@ class Canvas extends Component {
 
     onMouseDown() { this.mouse_down = true; }
     onMouseMove(e) { if (this.mouse_down) { if (!this.props.waiting) this.paint(e); }}
-    onMouseOut() { this.mouse_down = false; }
+    onMouseOut() { 
+        if (this.mouse_down) {
+            this.mouse_down = false;
+            this.props.onBrushStrokeComplete();
+        }
+    }
     onClick(e) { if (!this.props.waiting) this.paint(e); }
     onMouseUp(e) {
         if (this.props.waiting) return;
 
         this.mouse_down = false;
+        this.props.onBrushStrokeComplete();
         if (this.props.tool === 'fill') {
             let x = e.pageX - e.target.offsetLeft;
             let y = e.pageY - e.target.offsetTop;
