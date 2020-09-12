@@ -10,7 +10,7 @@ Choose from nine different semantic brushes to craft your painting. Then click o
 
 ![](https://i.imgur.com/QzNFAV6.png)
 
-Try it out yourself at $LINK. Or, read the article describing how it was made: "$TITLE".
+Try it out yourself by visiting [paintwithml.spell.ml](http://paintwithml.spell.ml/). To learn more about how this model was built and served, check out [the accompanying article](https://spell.ml/blog/paint-with-machine-learning-X10i3BAAACQAUI_o) on the Spell blog.
 
 ## Project hierarchy
 
