@@ -114,15 +114,19 @@ class App extends Component {
         let opts = {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            uri: `${window.location.href}predict`,
+            // NOTE(aleksey): update this value if the model server URL changes
+            uri: 'http://dev-aws-east-1.spell-external.dev.spell.services/spell-external/bob_ross/predict',
             json: true,
             body: {'segmap': this.canvasRef.canvas.toDataURL()}
         }
         rp(opts)
-            .then(png => {
+            .then(resp => {
+                const png = resp['image'];
                 this.setState(
                     Object.assign(
-                        {}, this.state, {'outputPicture': png, 'waiting': false, 'showPlaceholderOutputImage': false}
+                        {}, this.state, {
+                            'outputPicture': png, 'waiting': false, 'showPlaceholderOutputImage': false
+                        }
                     )
                 );
             })
