@@ -49,8 +49,11 @@ body {
     line-height: 34px;
     letter-spacing: 0.6px;
 }
-#logo-container {
+#talking-head-container {
     padding-right:48px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 .picture-header {
     font-weight: bold;
@@ -93,7 +96,7 @@ body {
     grid-row: 5;
     display: flex;
     align-items: center;
-    justify-content: right;
+    justify-content: flex-end;
     grid-column-gap: 24px;
 }
 #canvas-explainer-title-container {
@@ -113,13 +116,6 @@ body {
 #output-explainer-text-container {
     grid-column: 4;
     grid-row: 9;
-}
-.explainer-text-container {
-    font-size: 14px;
-    line-height: 24px;
-}
-.explainer-text-container > p {
-    margin-top: 0px;
 }
 #label-buttons-container {
     display: inline-flex;
@@ -141,19 +137,29 @@ body {
 #slider-container {
     margin-left: 16px;
 }
-.toolbox-section-label {
-    font-weight: bold;
-    font-size: 21px;
-    letter-spacing: -0.2px;
-    margin-bottom: 16px;
-    margin-top: 24px;
-}
 #reset-button-container {
     margin-top: 42px;
 }
 #logo {
     margin-top: 56px;
     margin-left: 36px;
+}
+#placeholder-picture {
+    height: 512px;
+    width: 512px;
+    background-image: url("/static/img/default.png");
+    background-size: 512px;
+}
+#logo-container {
+    margin-left: 5px;
+    height: 34px;
+}
+.explainer-text-container {
+    font-size: 14px;
+    line-height: 24px;
+}
+.explainer-text-container > p {
+    margin-top: 0px;
 }
 .button-image {
     display: block;
@@ -174,7 +180,7 @@ body {
 .selector.selected {
     background: #FFF;
     border-radius: 50px;
-    color: black;
+    color: #232323;
     font-weight: bold;
 }
 .selector.unselected:hover {
@@ -190,29 +196,65 @@ body {
 }
 .selector-name {
     text-transform: capitalize;
-    /* HACK: without this, the text is no aligned relative to the button, because the box model
-       applies padding around the content, including the letters that hang below the bottom of the
-       text line-height, e.g. the "y" in "Sky". I don't know how to fix this issue without
-       resorting to flexbox-block layout (which creates problems with button width), so I've just
-       hacked around it here by bumping the text two pixels.
-    */
-    position: relative;
-    top: 2px;
+}
+/* HACK: without this, the text is no aligned relative to the button, because the box model
+   applies padding around the content, including the letters that hang below the bottom of the
+   text line-height, e.g. the "y" in "Sky". I don't know how to fix this issue without
+   resorting to flexbox-block layout (which creates problems with button width), so I've just
+   hacked around it here by bumping the text two pixels.
+
+   This fix only needs to be performed in Firefox, Chrome lays it out without any problems.
+*/
+@supports (-moz-appearance:none) {
+    .selector-name {
+        position: relative;
+        top: 2px;
+    }
+}
+.toolbox-section-label {
+    font-weight: bold;
+    font-size: 21px;
+    letter-spacing: -0.2px;
+    margin-bottom: 16px;
+    margin-top: 24px;
 }
 .app.waiting {
     cursor: wait;
 }
+/* NOTE: styling range input elements in a mess. See the page
+   https://developer.mozilla.org/en-US/docs/Web/CSS/::-webkit-slider-runnable-track
+   (particularly the linked-to articles at the bottom) for details.
+*/
 input[type=range] {
+	-webkit-appearance: none;
     background: transparent;
+}
+input[type=range]:focus {
+    outline: none;
 }
 input[type=range]::-moz-range-track {
     background-color: #F2F0F6;
 }
 input[type=range]::-webkit-slider-runnable-track {
-    background-color: #F2F0F6;
+    background: white;
+    height: 2px;
+    border-radius: 1px;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+    background: white;
 }
 input[type=range]::-webkit-slider-thumb {
+	-webkit-appearance: none;
     border-width: 0px;
+    margin-top: 0px;
+    background: transparent;
+    border: 1px solid white;
+    background: white;
+    border-radius: 6px;
+    width: 12px;
+    height: 12px;
+    position: relative;
+    top: -5px;
 }
 input[type=range]::-moz-range-thumb {
     border-width: 0px;
@@ -251,11 +293,32 @@ input[type=range]::-moz-range-thumb {
 }
 .fancy-button.unfilled:hover {
     background: white;
-    color: black;
+    color: #232323;
 }
-#placeholder-picture {
-    height: 512px;
-    width: 512px;
-    background-image: url("/static/img/default.png");
-    background-size: 512px;
+.speech-bubble {
+    padding: 15px 24px;
+    font-weight: bold;
+    font-size: 13px;
+    line-height: 18px;
+    text-align: center;
+    letter-spacing: 0.857143px;
+    text-transform: uppercase;
+    color: #232323;
+}
+.error {
+    background: #FFBECB;
+    border: 1px solid #E01B42;
+}
+.info {
+    background: #8ADEE8;
+    border: 1px solid #44CADA;
+}
+.speech-bubble-connector {
+    height: 20px;
+    width: 20px;
+    transform: rotate(45deg);
+    border-left-width: 0;
+    border-bottom-width: 0;
+    position: relative;
+    left: -10px;
 }

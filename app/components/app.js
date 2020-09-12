@@ -6,6 +6,7 @@ import FancyButton from './fancy_button';
 import OutputPicture from './output_picture';
 import DownloadButton from './download_button';
 import TweetButton from './tweet_button';
+import SpeechBubble from './speech_bubble';
 
 import rp from 'request-promise-native';
 
@@ -77,7 +78,10 @@ class App extends Component {
                 uQmCC
             `,
             'waiting': false,
-            'showPlaceholderOutputImage': true
+            'showPlaceholderOutputImage': true,
+            'talkingHeadState': 'normal',
+            'talkingHeadMessage': '',
+            'firstBrushStrokeComplete': false
         }
 
         // These event handlers are passed down to and actually called within the child components,
@@ -90,18 +94,27 @@ class App extends Component {
         this.updateSegmentationMap = this.updateSegmentationMap.bind(this);
         this.onBuildButtonClick = this.onBuildButtonClick.bind(this);
         this.onResetButtonClick = this.onResetButtonClick.bind(this);
+        this.onBrushStrokeComplete = this.onBrushStrokeComplete.bind(this);
     }
 
     onToolboxLabelButtonClick(toolValue) {
         return () => {
-            let tool = this.state.tool === 'eraser' ? 'brush' : this.state.tool;
+            const tool = this.state.tool === 'eraser' ? 'brush' : this.state.tool;
             this.setState(Object.assign({}, this.state, {'tool': tool, 'toolValue': toolValue}));
         }
     }
 
     onToolboxToolButtonClick(tool) {
         return () => {
-            this.setState(Object.assign({}, this.state, {'tool': tool}));
+            let toolValue = null;
+            if (tool === 'eraser') {
+                toolValue = 'unset';
+            } else if(this.state.toolValue === 'unset') {
+                toolValue = 'sky';
+            } else {
+                toolValue = this.state.toolValue;
+            }
+            this.setState(Object.assign({}, this.state, {'tool': tool, 'toolValue': toolValue}));
         }
     }
 
@@ -109,13 +122,33 @@ class App extends Component {
         // model computations are expensive, so only allow one at a time
         if (this.state.waiting) { return; }
 
-        // the /predict endpoint is a proxy service for the request
+        // don't submit if some pixels are unset
+        for (let x of [...Array(512).keys()]) {
+            for (let y of [...Array(512).keys()]) {
+                const pos = (y * 512 * 4) + (x * 4);
+                const pixel = this.state.segmap.slice(pos, pos + 4);
+                if ((pixel[0] === 255) && (pixel[1] === 255) && (pixel[2] === 255) && (pixel[3] === 255)) {
+                    this.setState(Object.assign(
+                        {}, this.state, {
+                            'waiting': false,
+                            'talkingHeadState': 'error',
+                            'talkingHeadMessage': 'Make sure all of the pixels are filled in!'
+                        }
+                    ));
+                    // TODO: context cancellation.
+                    setInterval(() => {this.setState(Object.assign({}, this.state, 
+                        {'talkingHeadState': 'normal', 'talkingHeadMessage': ''}))}, 7000);
+                    return;
+                }
+            }
+        }
+
         this.setState(Object.assign({}, this.state, {'waiting': true}));
         let opts = {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             // NOTE(aleksey): update this value if the model server URL changes
-            uri: 'http://dev-aws-east-1.spell-external.dev.spell.services/spell-external/bob_ross/predict',
+            uri: 'http://dev-aws-east-1.spell-external.dev.spell.services/spell-external/paint_with_ml/predict',
             json: true,
             body: {'segmap': this.canvasRef.canvas.toDataURL()}
         }
@@ -131,9 +164,16 @@ class App extends Component {
                 );
             })
             .catch(err => {
-                // TODO: do something when an error occurs
-                this.setState(Object.assign({}, this.state, {'waiting': false}));
-                throw err;
+                this.setState(Object.assign(
+                    {}, this.state, {
+                        'waiting': false,
+                        'talkingHeadState': 'error',
+                        'talkingHeadMessage': 'Could not connect to model server. Maybe try again?'
+                    }
+                ));
+                // TODO: context cancellation.
+                setInterval(() => {this.setState(Object.assign({}, this.state, 
+                    {'talkingHeadState': 'normal', 'talkingHeadMessage': ''}))}, 7000);
             });
     }
 
@@ -143,6 +183,19 @@ class App extends Component {
 
     onResetButtonClick() {
         this.updateSegmentationMap(this.getDefaultCanvas());
+    }
+
+    onBrushStrokeComplete() {
+        if (!this.state.firstBrushStrokeComplete && this.state.tool === 'brush') {
+            this.setState(Object.assign({}, this.state, {
+                'firstBrushStrokeComplete': true,
+                'talkingHeadState': 'info',
+                'talkingHeadMessage': 'Once you are done painting, click on "Run" to see the result.'
+            }));
+            // TODO: context cancellation
+            setInterval(() => {this.setState(Object.assign({}, this.state, 
+                {'talkingHeadState': 'normal', 'talkingHeadMessage': ''}))}, 7000);
+        }
     }
 
     updateSegmentationMap(segmap) {
@@ -172,16 +225,33 @@ class App extends Component {
     }
 
     render() {
-        let classname = (this.state.waiting) ? 'app waiting' : 'app';
+        const classNames = (this.state.waiting) ? 'app waiting' : 'app';
+
+        // TODO: make DRY -- this duplicates the values set in the .info and .error CSS classes
+        let talkingHeadLogoFill = null;
+        switch (this.state.talkingHeadState) {
+            case 'info':
+                talkingHeadLogoFill = '#8ADEE8';
+                break;
+            case 'error':
+                talkingHeadLogoFill = '#E01B42';
+                break;
+            default:
+                talkingHeadLogoFill = 'white';
+        }
+        
         return <div id='app'>
             <div id='title-frame'>
                 <div id='title-text-container'>
                     Paint with Machine Learning
                 </div>
-                <div id='logo-container'>
-                    <svg width="35" height="34" viewBox="0 0 35 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fillRule="evenodd" clipRule="evenodd" d="M11.8568 3.98763C11.8972 4.11414 11.9862 4.2194 12.1043 4.28017L29.2208 13.0903C29.3389 13.1511 29.4763 13.1624 29.6027 13.1217L29.8538 13.041C30.5147 12.829 31.0769 12.3513 31.3951 11.7331C31.7738 10.9973 31.7846 10.1143 31.4248 9.37078L31.1482 8.79865C29.9921 6.41137 28.2214 4.34331 26.0585 2.82156C25.7418 2.59873 25.7697 2.12099 26.1453 2.02683C26.7055 1.8864 27.2988 1.87685 27.8837 2.01344L28.1285 2.07079C28.3974 2.13377 28.6664 1.96692 28.7294 1.6981L28.8583 1.14818C28.9214 0.87924 28.7544 0.61013 28.4854 0.547197L28.2416 0.490145C26.7576 0.143085 25.2313 0.453084 24.01 1.31275C23.8545 1.42222 23.6528 1.44682 23.4792 1.36921C20.6737 0.115173 17.5122 -0.300403 14.4769 0.217704L13.8509 0.324342C13.0368 0.463597 12.3241 0.986177 11.9457 1.72134C11.6271 2.34024 11.5654 3.07463 11.7766 3.73636L11.8568 3.98763ZM28.1611 15.051C28.3305 15.1357 28.4375 15.3088 28.4375 15.4982V15.621C28.4375 18.8939 26.4335 21.1176 23.6057 21.9853C22.9081 22.1518 21.9786 22.2829 20.7811 22.2829C20.1193 22.2829 19.5241 22.2429 18.9958 22.1789C15.6325 21.3603 13.125 18.2821 13.125 14.621V8.34194C13.125 7.97025 13.5162 7.7285 13.8486 7.89473L28.1611 15.051ZM16.6261 22.6618C16.2733 22.7226 15.9111 22.7886 15.5372 22.859L11.9221 24.6586C7.43447 26.8925 6.83773 27.6281 6.83773 30.9241V33.1662H20.9187H35L34.8384 30.9022C34.574 27.2008 33.8584 26.4518 28.1459 23.9005L26.1128 22.9925C25.603 22.8473 25.1147 22.725 24.6424 22.6235L20.9517 29.7206C20.8784 29.8616 20.6778 29.8649 20.5999 29.7264L16.6261 22.6618ZM0.490617 16.0781C-0.678716 14.4051 0.361018 10.525 2.35398 9.12419C3.05617 8.63075 3.09142 8.6494 3.29154 9.62122C3.40579 10.1768 3.79165 10.953 4.14846 11.346C5.608 12.9539 5.94261 14.7634 5.02366 16.0781C4.60548 16.6766 4.20428 16.8055 2.75714 16.8055C1.31 16.8055 0.908796 16.6766 0.490617 16.0781ZM1.90479 32.4061C1.21892 29.8352 0.66037 19.507 1.17942 18.9871C1.2989 18.867 2.08988 18.7688 2.93669 18.7688C4.25749 18.7688 4.50429 18.8735 4.67339 19.505C4.97143 20.6205 4.91822 23.4964 4.52518 27.4648C3.99666 32.8053 3.854 33.3298 2.92918 33.3298C2.35137 33.3298 2.08792 33.0919 1.90479 32.4061Z" fill="white"/>
-                    </svg>
+                <div id='talking-head-container'>
+                    <SpeechBubble type={this.state.talkingHeadState} message={this.state.talkingHeadMessage} />
+                    <div id='logo-container'>
+                        <svg width="35" height="34" viewBox="0 0 35 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path fillRule="evenodd" clipRule="evenodd" d="M11.8568 3.98763C11.8972 4.11414 11.9862 4.2194 12.1043 4.28017L29.2208 13.0903C29.3389 13.1511 29.4763 13.1624 29.6027 13.1217L29.8538 13.041C30.5147 12.829 31.0769 12.3513 31.3951 11.7331C31.7738 10.9973 31.7846 10.1143 31.4248 9.37078L31.1482 8.79865C29.9921 6.41137 28.2214 4.34331 26.0585 2.82156C25.7418 2.59873 25.7697 2.12099 26.1453 2.02683C26.7055 1.8864 27.2988 1.87685 27.8837 2.01344L28.1285 2.07079C28.3974 2.13377 28.6664 1.96692 28.7294 1.6981L28.8583 1.14818C28.9214 0.87924 28.7544 0.61013 28.4854 0.547197L28.2416 0.490145C26.7576 0.143085 25.2313 0.453084 24.01 1.31275C23.8545 1.42222 23.6528 1.44682 23.4792 1.36921C20.6737 0.115173 17.5122 -0.300403 14.4769 0.217704L13.8509 0.324342C13.0368 0.463597 12.3241 0.986177 11.9457 1.72134C11.6271 2.34024 11.5654 3.07463 11.7766 3.73636L11.8568 3.98763ZM28.1611 15.051C28.3305 15.1357 28.4375 15.3088 28.4375 15.4982V15.621C28.4375 18.8939 26.4335 21.1176 23.6057 21.9853C22.9081 22.1518 21.9786 22.2829 20.7811 22.2829C20.1193 22.2829 19.5241 22.2429 18.9958 22.1789C15.6325 21.3603 13.125 18.2821 13.125 14.621V8.34194C13.125 7.97025 13.5162 7.7285 13.8486 7.89473L28.1611 15.051ZM16.6261 22.6618C16.2733 22.7226 15.9111 22.7886 15.5372 22.859L11.9221 24.6586C7.43447 26.8925 6.83773 27.6281 6.83773 30.9241V33.1662H20.9187H35L34.8384 30.9022C34.574 27.2008 33.8584 26.4518 28.1459 23.9005L26.1128 22.9925C25.603 22.8473 25.1147 22.725 24.6424 22.6235L20.9517 29.7206C20.8784 29.8616 20.6778 29.8649 20.5999 29.7264L16.6261 22.6618ZM0.490617 16.0781C-0.678716 14.4051 0.361018 10.525 2.35398 9.12419C3.05617 8.63075 3.09142 8.6494 3.29154 9.62122C3.40579 10.1768 3.79165 10.953 4.14846 11.346C5.608 12.9539 5.94261 14.7634 5.02366 16.0781C4.60548 16.6766 4.20428 16.8055 2.75714 16.8055C1.31 16.8055 0.908796 16.6766 0.490617 16.0781ZM1.90479 32.4061C1.21892 29.8352 0.66037 19.507 1.17942 18.9871C1.2989 18.867 2.08988 18.7688 2.93669 18.7688C4.25749 18.7688 4.50429 18.8735 4.67339 19.505C4.97143 20.6205 4.91822 23.4964 4.52518 27.4648C3.99666 32.8053 3.854 33.3298 2.92918 33.3298C2.35137 33.3298 2.08792 33.0919 1.90479 32.4061Z" fill={talkingHeadLogoFill}/>
+                        </svg>
+                    </div>
                 </div>
             </div>
             <div id='side-panel-frame'>
@@ -199,7 +269,7 @@ class App extends Component {
                     />
                 </div>
             </div>
-            <div id='interior-frame' className={classname}>
+            <div id='interior-frame' className={classNames}>
                 <div className='picture-header' id='canvas-header'>INPUT</div>
                 <div className='picture-header' id='output-header'>OUTPUT</div>
                 <div id='canvas-container'>
@@ -212,6 +282,7 @@ class App extends Component {
                         toolValue={this.state.toolValue}
                         segmap={this.state.segmap}
                         updateSegmentationMap={this.updateSegmentationMap}
+                        onBrushStrokeComplete={this.onBrushStrokeComplete}
                         colorKey={this.colorKey}
                         waiting={this.state.waiting}
                         ref={(canvas) => this.canvasRef = canvas}
@@ -251,7 +322,7 @@ class App extends Component {
                         Choose from nine different semantic brushes to craft your painting. Then click on the "Run" button to generate a result!
                     </p>
                     <p>
-                        The <a href="https://www.kaggle.com/residentmario/segmented-bob-ross-images" style={{color: 'white'}}>dataset</a> and <a href="https://github.com/ResidentMario/paint-with-ml" style={{color: 'white'}}>code</a> are publicly available. To learn more, check out our blog post: $LINK.
+                        The <a href="https://www.kaggle.com/residentmario/segmented-bob-ross-images" style={{color: 'white'}}>dataset</a> and <a href="https://github.com/ResidentMario/paint-with-ml" style={{color: 'white'}}>code</a> are publicly available. To learn more about how it works, check out <a href="https://spell.ml/blog/paint-with-machine-learning-X10i3BAAACQAUI_o" style={{color: 'white'}}>our blog post</a>.
                     </p>
                 </div>
                 <div id='output-explainer-text-container' className='explainer-text-container'>
@@ -262,7 +333,7 @@ class App extends Component {
                         We provide an easy-to-use API for deploying your model server publicly or privately. And because we serve models using Kubernetes, the service automatically scales up and down based on demand.
                     </p>
                     <p>
-                        $CTA
+                        To learn more, see <a href="https://spell.ml/docs/model_servers" style={{color: 'white'}}>our docs</a>.
                     </p>
                 </div>
             </div>
