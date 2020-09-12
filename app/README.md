@@ -2,15 +2,11 @@
 
 This folder defines our consumer-facing web application.
 
-## How it works
+The application frontend is in React. The core of the application is a drawable HTML Canvas with click-based interaction logic. The application backend is a [model server](https://spell.ml/docs/model_servers) running on Spell.
 
-The application frontend is in React. The core of the application is a drawable HTML Canvas with click-based interaction logic. The application backend is a [model server](https://spell.ml/docs/model_servers) running on Spell. A simple `/predict` proxies requests to the model server to the correct Spell endpoint.
+## Deployment
 
-## Standing up the model server
-
-This section is a TODO.
-
-## Building the app
+### Local
 
 1. Run `npm install` to install the JS packages.
 2. Run `npm run-script build` to build the app JS assets.
@@ -21,4 +17,8 @@ This section is a TODO.
    export FLASK_APP=app.py
    export FLASK_ENV=development
    ```
-5. Start the web service using `flask run --no-reload`. Once the server is running, navigate to the linked-to web page and try it out.
+5. Start the web service using `flask run --no-reload`.
+
+### Remote
+
+We're hosting this site statically on AWS S3. See [Enabling website hosting](https://docs.aws.amazon.com/AmazonS3/latest/dev/EnableWebsiteHosting.html) in the AWS documentation for details, and `app/scripts/upload_to_s3.sh` for the deploy script.

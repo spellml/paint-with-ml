@@ -256,6 +256,6 @@ input[type=range]::-moz-range-thumb {
 #placeholder-picture {
     height: 512px;
     width: 512px;
-    background-image: url("/default.png");
+    background-image: url("/static/img/default.png");
     background-size: 512px;
 }
