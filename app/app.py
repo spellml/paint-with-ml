@@ -9,12 +9,4 @@ app = Flask('neural-painter', static_folder='static')
 def index():
     return send_file('index.html')
 
-# @app.route('/static/img/favicon.png', methods=['GET'])
-# def favicon():
-#     return send_file('favicon.png')
-
-# @app.route('/static/img/default.png', methods=['GET'])
-# def default():
-#     return send_file('static/img/default.png')
-
 print('App ready!')
