@@ -148,7 +148,9 @@ class App extends Component {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             // NOTE(aleksey): update this value if the model server URL changes
-            uri: 'http://dev-aws-east-1.spell-external.dev.spell.services/spell-external/paint_with_ml/predict',
+            // DEV uri: 'http://dev-aws-east-1.spell-external.dev.spell.services/spell-external/paint_with_ml/predict',
+            // PROD
+            uri: 'http://spell-org.spell-org.spell.services/spell-org/paint_with_ml/predict',
             json: true,
             body: {'segmap': this.canvasRef.canvas.toDataURL()}
         }
