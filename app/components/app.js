@@ -316,7 +316,7 @@ class App extends Component {
                         This web app allows you to create a landscape painting in the style of Bob Ross using a deep learning model served using a <a href="https://spell.ml/docs/model_servers/" style={{color: 'white'}}>Spell model server</a>. To do so paint some shapes on the canvas with a set of thematic (trees, mountains, etcetera) brushes provided to you. The shapes you paint are sent to a model server endpoint, which computes an output and presents it on the other screen.
                     </p>
                     <p>
-                        The <a href="https://www.kaggle.com/residentmario/segmented-bob-ross-images" style={{color: 'white'}}>dataset</a> and <a href="https://github.com/ResidentMario/paint-with-ml" style={{color: 'white'}}>code</a> are publicly available. To learn more about how it works and how it was developed, check out <a href="https://spell.ml/blog/paint-with-machine-learning-X10i3BAAACQAUI_o" style={{color: 'white'}}>our blog post</a>.
+                        The <a href="https://www.kaggle.com/residentmario/segmented-bob-ross-images" style={{color: 'white'}}>dataset</a> and <a href="https://github.com/ResidentMario/paint-with-ml" style={{color: 'white'}}>code</a> are publicly available. To learn more about how it works and how it was developed, check out <a href="https://spell.ml/blog/paint-with-ml-deep-learning-X2ALJRAAACQAXYTZ" style={{color: 'white'}}>our blog post</a>.
                     </p>
                 </div>
                 <div id='output-explainer-text-container' className='explainer-text-container'>
