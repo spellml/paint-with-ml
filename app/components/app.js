@@ -306,34 +306,29 @@ class App extends Component {
                     <TweetButton/>
                 </div>
                 <div id='canvas-explainer-title-container'>
-                    About the Model
+                    About Paint with Machine Learning
                 </div>
                 <div id='output-explainer-title-container'>
-                    About Spell
+                    About Spell Model Serving
                 </div>
                 <div id='canvas-explainer-text-container' className='explainer-text-container'>
                     <p>
-                        This app uses a version of the GauGAN deep learning model to transform an input segmentation masks into a landscape painting.
+                        This web app allows you to create a landscape painting in the style of Bob Ross using a deep learning model served using a <a href="https://spell.ml/docs/model_servers/" style={{color: 'white'}}>Spell model server</a>. To do so paint some shapes on the canvas with a set of thematic (trees, mountains, etcetera) brushes provided to you. The shapes you paint are sent to a model server endpoint, which computes an output and presents it on the other screen.
                     </p>
                     <p>
-                        <a href="https://github.com/NVlabs/SPADE" style={{color: 'white'}}>GauGAN</a>, released in 2019, is the most powerful image-to-image translation algorithm currently known. This version of the model has been trained on the popular ADE20K dataset, then fine-tuned on a dataset of 250 paintings from Bob Ross's beloved PBS series, <a href="https://www.youtube.com/user/BobRossInc" style={{color: 'white'}}>"The Joy of Painting"</a>.
-                    </p>
-                    <p>
-                        Choose from nine different semantic brushes to craft your painting. Then click on the "Run" button to generate a result!
-                    </p>
-                    <p>
-                        The <a href="https://www.kaggle.com/residentmario/segmented-bob-ross-images" style={{color: 'white'}}>dataset</a> and <a href="https://github.com/ResidentMario/paint-with-ml" style={{color: 'white'}}>code</a> are publicly available. To learn more about how it works, check out <a href="https://spell.ml/blog/paint-with-machine-learning-X10i3BAAACQAUI_o" style={{color: 'white'}}>our blog post</a>.
+                        The <a href="https://www.kaggle.com/residentmario/segmented-bob-ross-images" style={{color: 'white'}}>dataset</a> and <a href="https://github.com/ResidentMario/paint-with-ml" style={{color: 'white'}}>code</a> are publicly available. To learn more about how it works and how it was developed, check out <a href="https://spell.ml/blog/paint-with-machine-learning-X10i3BAAACQAUI_o" style={{color: 'white'}}>our blog post</a>.
                     </p>
                 </div>
                 <div id='output-explainer-text-container' className='explainer-text-container'>
+
                     <p>
-                        <a href="https://spell.ml/" style={{color: 'white'}}>Spell</a> is a powerful end-to-end machine learning model training and deployment platform. The model powering this application was trained in Spell runs and workspaces and then deployed into production using a Spell model server.
+                        <a href="https://spell.ml/" style={{color: 'white'}}>Spell</a> is a powerful end-to-end machine learning model training and deployment platform. The model powering this application was trained using the Spell platform and then deployed into production using Spell’s new Model Serving feature.
                     </p>
                     <p>
-                        We provide an easy-to-use API for deploying your model server publicly or privately. And because we serve models using Kubernetes, the service automatically scales up and down based on demand.
+                        Spell provides an easy-to-use API for deploying your model server publicly or privately. Models are served on Kubernetes, so the service automatically scales up and down based on demand.
                     </p>
                     <p>
-                        To learn more, see <a href="https://spell.ml/docs/model_servers" style={{color: 'white'}}>our docs</a>.
+                        <a href="https://spell.ml/docs/model_servers" style={{color: 'white'}}>Click here to learn more</a>.
                     </p>
                 </div>
             </div>
