@@ -273,7 +273,7 @@ class App extends Component {
                 </div>
             </div>
             <div id='interior-frame' className={classNames}>
-                <DisplaySizeNagBar />
+                {/* <DisplaySizeNagBar /> */}
                 <div className='picture-header' id='canvas-header'>INPUT</div>
                 <div className='picture-header' id='output-header'>OUTPUT</div>
                 <div id='canvas-container'>
