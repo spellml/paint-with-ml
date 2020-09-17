@@ -7,6 +7,7 @@ import OutputPicture from './output_picture';
 import DownloadButton from './download_button';
 import TweetButton from './tweet_button';
 import SpeechBubble from './speech_bubble';
+import DisplaySizeNagBar from './display_size_nag_bar';
 
 import rp from 'request-promise-native';
 
@@ -272,6 +273,7 @@ class App extends Component {
                 </div>
             </div>
             <div id='interior-frame' className={classNames}>
+                <DisplaySizeNagBar />
                 <div className='picture-header' id='canvas-header'>INPUT</div>
                 <div className='picture-header' id='output-header'>OUTPUT</div>
                 <div id='canvas-container'>
